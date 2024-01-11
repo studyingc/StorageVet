@@ -207,10 +207,17 @@ class LoadFollowing(MarketServiceUpAndDown):
         return constraint_list  """최적화 엔진에 추가할 모든 제약 조건을 구축하고 반환"""
 
     def update_price_signals(self, monthly_data, time_series_data):
-        """ Updates attributes related to price signals with new price signals
-        that are saved in the arguments of the method. Only updates the
-        price signals that exist, and does not require all price signals
-        needed for this service.
+        """ 새로운 가격 신호로 속성을 업데이트하는 메서드인 update_price_signals를 정의합니다. 
+            이 메서드는 월간 데이터와 시계열 데이터를 받아서 해당 서비스에 필요한 가격 신호를 업데이트합니다.
+
+            combined_market이 참(True)인 경우:
+            time_series_data에서 'LF Price ($/kW)' 열을 가져와서 fr_price 변수에 할당합니다.
+            self.p_regu와 self.p_regd를 fr_price를 2로 나눈 값으로 각각 업데이트합니다.
+            'DA Price ($/kWh)' 열을 가져와서 self.price에 할당합니다.
+            
+            combined_market이 거짓(False)인 경우:
+            'LF Down Price ($/kW)', 'LF Up Price ($/kW)', 'DA Price ($/kWh)' 열을 차례로 가져와서 각각 self.p_regd, self.p_regu, self.price에 할당합니다.
+            해당 열이 존재하지 않을 경우 KeyError를 처리하여 넘어갑니다.
 
         Args:
             monthly_data (DataFrame): monthly data after pre-processing
