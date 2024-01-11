@@ -46,7 +46,13 @@ class LoadFollowing(MarketServiceUpAndDown):
     """
    # LoadFollowing 클래스를 MarketServiceUpAndDown 클래스의 하위 클래스로 정의
     def __init__(self, params):
-        """ Generates the objective function, finds and creates constraints.
+        """ MarketServiceUpAndDown 클래스를 상속하며, 최적화 문제를 해결하기 위한 초기 설정을 수행합니다.
+        LoadFollowing 클래스의 생성자(__init__ 메서드)에서는 다음과 같은 작업들을 수행합니다:
+        MarketServiceUpAndDown 클래스의 생성자를 호출하여 해당 클래스를 초기화합니다. 
+        이때, 'LF'와 'Load Following'를 인자로 전달하여 서비스의 유형을 지정합니다.
+        입력으로 받은 params 딕셔너리에서 필요한 매개변수를 설정합니다. 
+        이 중에서도 상향 및 하향 에너지 제어에 대한 제약사항 여부를 나타내는 u_ts_constraints와 d_ts_constraints를 확인하고, 해당하는 경우 상한과 하한 값을 설정합니다.
+        시계열 데이터의 시간 간격(dt)이 0.25보다 큰 경우에는 경고 메시지를 출력합니다.
 
         Args:
             params (Dict): input parameters
@@ -70,10 +76,13 @@ class LoadFollowing(MarketServiceUpAndDown):
                              "time series timestep is greater than 15 min.")
 
     def grow_drop_data(self, years, frequency, load_growth):
-        """ Adds data by growing the given data OR drops any extra data that
-        might have slipped in. Update variable that hold timeseries data
-        after adding growth data. These method should be called after
-        add_growth_data and before the optimization is run.
+        """ 시계열 데이터를 성장시키거나 추가된 데이터를 삭제하는 작업을 수행하는 grow_drop_data 메서드를 정의한다.
+            최적화가 실행되기 전에 add_growth_data 메서드 이후에 호출되어야 합니다.
+            MarketServiceUpAndDown 클래스의 grow_drop_data 메서드를 호출하여 초기 설정을 수행합니다.
+            eou_avg와 eod_avg 변수에 대해 추가된 데이터를 0으로 채우고 불필요한 데이터를 삭제합니다. 
+            이는 시뮬레이션 기간 동안 부가된 데이터에 대해 정리 작업을 수행합니다.
+            만약 상향 에너지 제어 제약이 있다면(self.u_ts_constraints가 참인 경우), regu_max와 regu_min 변수에 대해서도 동일한 작업을 수행합니다.
+            만약 하향 에너지 제어 제약이 있다면(self.d_ts_constraints가 참인 경우), regd_max와 regd_min 변수에 대해서도 동일한 작업을 수행합니다.
 
         Args:
             years (List): list of years for which analysis will occur on
