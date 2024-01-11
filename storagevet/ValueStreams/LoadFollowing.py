@@ -118,7 +118,11 @@ class LoadFollowing(MarketServiceUpAndDown):
             self.regd_min = Lib.drop_extra_data(self.regd_min, years)             """그 과정 반복"""
 
     def get_energy_option_up(self, mask):                      
-        """ transform the energy option up into a n x 1 vector
+        """ 상향 에너지 옵션을 n x 1 벡터로 변환하여 CVXPY의 파라미터를 생성하는 메서드인 get_energy_option_up를 정의
+            mask 인자는 불리언 마스크로, 시점을 지정합니다.
+            self.eou_avg에서 mask에 해당하는 시점들의 데이터를 가져와서 values 속성으로 NumPy 배열을 얻습니다. 
+            cvx.Parameter를 사용하여 CVXPY의 파라미터를 생성합니다. 이 때, 파라미터의 크기는 sum(mask)로 지정되며, 해당 크기의 n x 1 벡터로 상향 에너지 옵션을 표현합니다.
+            파라미터의 이름은 'LF_EOU'로 설정됩니다.
 
         Args:
             mask:
