@@ -245,6 +245,7 @@ class RotatingGenerator(DER):
         return constraint_list
 
     def timeseries_report(self):
+    # DER의 최적화 결과 요약
         """ Summaries the optimization results for this DER.
 
         Returns: A timeseries dataframe with user-friendly column headers that
