@@ -41,13 +41,16 @@ import storagevet.Library as Lib
 # 에너지 저장 시스템이 참여하는 시장 서비스를 나타내며, 최적화 문제의 목적 함수 및 제약 조건을 생성하고 관리하는 데 사용됩니다.
 
 class MarketServiceUp(ValueStream):
-    """ A market service that provides service only through bringing demand down
+    """MarketServiceUp 클래스는 ValueStream 클래스를 상속받아 에너지 저장 시스템이 참여하는 특정 시장 서비스를 표현합니다.
 
     """
 
     def __init__(self, name, full_name, params):
-        """ Generates the objective function, finds and creates constraints.
-
+        """객체 생성 시 호출되는 초기화 메서드로, 클래스의 속성들을 초기화합니다.
+        name, full_name, params를 매개변수로 받아와서 상위 클래스 ValueStream의 생성자를 호출하여 기본 속성을 초기화합니다.
+        params 딕셔너리에서 price, growth, duration 등의 매개변수를 추출하여 해당 클래스 속성으로 설정합니다.
+        self.variable_names은 {'ch_less', 'dis_more'}로 설정되어 있습니다.
+        빈 DataFrame인 self.variables_df를 생성하고, 열은 self.variable_names에 따라 초기화됩니다.
         Args:
             name (str): abbreviated name
             full_name (str): the expanded name of the service
@@ -62,11 +65,9 @@ class MarketServiceUp(ValueStream):
         self.variables_df = pd.DataFrame(columns=self.variable_names)
 
     def grow_drop_data(self, years, frequency, load_growth):
-     # 주어진 데이터를 성장시키거나 추가된 데이터를 제거
-        """ Adds data by growing the given data OR drops any extra data that might have slipped in.
-        Update variable that hold timeseries data after adding growth data. These method should be
-        called after add_growth_data and before the optimization is run.
-
+     # 주어진 데이터를 성장시키거나 추가된 데이터를 제거 /주로 시뮬레이션 분석에 사용되는 데이터를 처리하는 목적으로 설계
+        """ Lib.fill_extra_data 함수를 사용하여 self.price 속성에 대한 주어진 연도 및 성장률을 사용하여 추가 데이터를 성장시킵니다.
+        Lib.drop_extra_data 함수를 사용하여 self.price 속성에서 주어진 연도에 해당하는 데이터를 제거합니다.
         Args:
             years (List): list of years for which analysis will occur on
             frequency (str): period frequency of the timeseries data
@@ -78,8 +79,10 @@ class MarketServiceUp(ValueStream):
         self.price = Lib.drop_extra_data(self.price, years)                          # 시장 서비스의 price 속성에서 주어진 연도에 해당하는 데이터를 제거
 
     def initialize_variables(self, size):
-     # 최적화에 필요한 변수들을 초기화하고 딕셔너리에 추가
-        """ Adds optimization variables to dictionary
+     # 최적화에 필요한 변수들을 초기화하고 딕셔너리에 추가 /주로 CVXPY 라이브러리를 사용하여 최적화에 필요한 변수를 정의하고 이를 클래스의 속성으로 저장
+        """cvx.Variable 함수를 사용하여 ch_less와 dis_more 두 가지 최적화 변수를 생성합니다.
+        이 변수들은 CVXPY 라이브러리에서 제공하는 최적화 변수를 나타냅니다.
+        생성된 변수들은 self.variables 딕셔너리에 저장되어 클래스의 속성으로 활용됩니다.
 
         Variables added:
             dis_more (Variable): A cvxpy variable for spinning reserve capacity to increase
@@ -99,7 +102,13 @@ class MarketServiceUp(ValueStream):
 
     def objective_function(self, mask, load_sum, tot_variable_gen, generator_out_sum,
                            net_ess_power, annuity_scalar=1):
-        """ Generates the full objective function, including the optimization variables.
+        """ 적화의 목적 함수를 생성하는 역할을 합니다. 
+            함수는 주어진 데이터와 변수들을 기반으로 CVXPY 라이브러리를 사용하여 최적화 목적 함수를 정의하고 반환
+            cvx.Parameter 함수를 사용하여 payment 파라미터를 생성합니다. 
+            이는 시간에 따른 가격을 나타내며, self.price에서 mask에 해당하는 값을 사용합니다.
+            
+            최종적으로, 최적화 목적 함수를 정의하고 반환합니다. 
+            목적 함수는 시간에 따른 payment와 self.variables['ch_less'], self.variables['dis_more']를 사용하여 정의됩니다.
 
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series
@@ -129,7 +138,17 @@ class MarketServiceUp(ValueStream):
 # CVXPY 라이브러리를 사용하여 최적화 변수와 가격을 사용하여 최종 목적 함수를 정의
     def constraints(self, mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power,
                     combined_rating):
-        """Default build constraint list method. Used by services that do not have constraints.
+        """ 제약 조건의 목록을 생성하는 역할을 합니다. 
+            주어진 데이터와 변수들을 기반으로 CVXPY 라이브러리를 사용하여 최적화에 적용될 제약 조건들을 정의하고 목록으로 반환
+
+            빈 제약 조건 목록을 생성합니다.
+            cvx.NonPos(-self.variables['ch_less']): self.variables['ch_less'] 변수가 음수가 되지 않도록 하는 제약 조건을 생성합니다. 
+            이는 충전 용량을 음수로 제한하려는 것입니다.
+            
+            cvx.NonPos(-self.variables['dis_more']): self.variables['dis_more'] 변수가 음수가 되지 않도록 하는 제약 조건을 생성합니다. 
+            이는 방전 용량을 음수로 제한하려는 것입니다.
+            
+            생성된 제약 조건들을 목록에 추가하고 반환합니다.
 
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series
