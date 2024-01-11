@@ -171,8 +171,9 @@ class MarketServiceUp(ValueStream):
         return constraint_list
 
     def p_reservation_charge_up(self, mask):
-        """ the amount of charging power in the up direction (supplying power up into the grid)
-        that needs to be reserved for this value stream
+        """ 해당 시장 서비스에서 사용되는 충전 전력의 양을 반환하는 역할을 합니다. 
+            반환되는 값은 CVXPY 라이브러리에서 사용되는 파라미터 또는 변수입니다.
+            
 
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series
@@ -182,10 +183,10 @@ class MarketServiceUp(ValueStream):
 
         """
         return self.variables['ch_less']
-# 최적화 문제에서 충전으로 전력을 제어할 때 사용
+
     def p_reservation_discharge_up(self, mask):
-        """ the amount of discharge power in the up direction (supplying power up into the grid)
-        that needs to be reserved for this value stream
+        """ 해당 시장 서비스에서 사용되는 방전 전력의 양을 반환하는 역할을 합니다. 
+            반환되는 값은 CVXPY 라이브러리에서 사용되는 파라미터 또는 변수입니다.
 
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series
@@ -195,13 +196,13 @@ class MarketServiceUp(ValueStream):
 
         """
         return self.variables['dis_more']
-# 최적화 문제에서 방전으로 전력을 제어할 때 사용
-    def worst_case_uenergy_provided(self, mask):
-        """ the amount of energy, from the current SOE that needs to be reserved for this value
-        stream to prevent any violates between the steps in time that are not catpured in our
-        timeseries.
 
-        Note: stored energy should be positive and provided energy should be negative
+    def worst_case_uenergy_provided(self, mask):
+        """ 재 SOE(에너지 저장 장치의 상태)에서 해당 시장 서비스에 대한 에너지 예약을 계산합니다. 
+            반환값은 두 가지 경우에 대한 튜플이며, 각각은 에너지가 예상보다 많아지는 경우와 적어지는 경우를 나타냅니다.
+
+            provided: 현재 시간 텀 내에서 self.variables['ch_less']와 self.variables['dis_more']에 의해 제공되는 에너지를 계산합니다. 
+            ch_less는 양수일 때 많은 에너지 공급을 나타내며, dis_more는 양수일 때 적은 에너지 공급을 나타냅니다.
 
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series
@@ -217,7 +218,15 @@ class MarketServiceUp(ValueStream):
         return provided
 
     def timeseries_report(self):
-        """ Summaries the optimization results for this Value Stream.
+        """ 최적화 결과를 요약하고 사용자에게 보기 쉬운 형식으로 제공하는 역할을 합니다. 
+            반환값은 시계열 데이터프레임이며, 해당 Value Stream 인스턴스와 관련된 결과를 나타내는 사용자 친화적인 열 헤더를 포함합니다.
+
+            report 데이터프레임을 생성하고, 인덱스는 self.price.index로 설정됩니다.
+            
+            다양한 열이 추가됩니다.
+            "{self.name} Price ($/kW)": ValueStream의 가격 정보를 나타냅니다.
+            "{self.full_name} Up (Charging) (kW)": ValueStream의 충전 전력량을 나타냅니다.
+            "{self.full_name} Up (Discharging) (kW)": ValueStream의 방전 전력량을 나타냅니다.
 
         Returns: A timeseries dataframe with user-friendly column headers that summarize the
             results pertaining to this instance
@@ -231,7 +240,19 @@ class MarketServiceUp(ValueStream):
         return report
 
     def proforma_report(self, opt_years, apply_inflation_rate_func, fill_forward_func, results):
-        """ Calculates the proforma that corresponds to participation in this value stream
+        """ 특정 시장 서비스에 참여한 결과에 기반하여 해당 가치 스트림에 대한 수익 예측을 계산합니다. 
+            이러한 계산은 연간으로 진행되며, 수익은 최적화 결과와 시장 가격을 고려하여 산출됩니다.
+
+            super().proforma_report를 호출하여 상위 클래스의 proforma_report 메서드를 실행하고 초기화합니다.
+            
+            results 데이터프레임으로부터 "{self.full_name} Up (Charging) (kW)"와 "{self.full_name} Up (Discharging) (kW)" 열을 사용하여 입찰(bid)을 계산합니다. 
+            이는 충전 및 방전 전력량을 합산한 결과입니다.
+            
+            bid와 가격 정보를 이용하여 일정 시간 동안의 비용 또는 수익을 계산합니다.
+            
+            각 연도별로 계산된 수익을 proforma 데이터프레임에 추가합니다.
+            
+            fill_forward_func를 사용하여 성장률이 적용된 컬럼을 전방으로 채웁니다.
 
         Args:
             opt_years (list): list of years the optimization problem ran for
