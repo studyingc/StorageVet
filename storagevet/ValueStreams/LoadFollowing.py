@@ -151,7 +151,16 @@ class LoadFollowing(MarketServiceUpAndDown):
 
     def constraints(self, mask, load_sum, tot_variable_gen, generator_out_sum,
                     net_ess_power, combined_rating):
-        """build constraint list method for the optimization engine
+        """최적화 엔진에 추가될 제약 조건들을 구축하는 메서드인 constraints를 정의
+           super().constraints(...) 부분은 상위 클래스인 MarketServiceUpAndDown의 constraints 메서드를 호출하여 초기 제약 조건 목록을 가져옵니다.
+           
+           상향 에너지 제어 제약이 존재하는 경우(self.u_ts_constraints가 참인 경우), 상향 참여의 제약 조건을 추가합니다. 
+           이는 up_ch와 up_dis 변수의 합이 상한치(regu_max)를 초과하지 않아야 하고, 동시에 하한치(regu_min) 미만이어야 한다는 것을 나타냅니다.
+           
+           하향 에너지 제어 제약이 존재하는 경우(self.d_ts_constraints가 참인 경우), 하향 참여의 제약 조건을 추가합니다. 
+           이는 down_ch와 down_dis 변수의 합이 상한치(regd_max)를 초과하지 않아야 하고, 동시에 하한치(regd_min) 미만이어야 한다는 것을 나타냅니다.
+           
+           최종적으로 모든 제약 조건을 포함한 리스트를 반환합니다.
 
         Args:
             mask (DataFrame): A boolean array that is true for indices
