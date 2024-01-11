@@ -37,10 +37,10 @@ class Period:
     def get_tier(self, number):
         """"
         Args:
-            number (Int): index for which tier to return
+            number (Int): index for which tier to return / 반환할 티어의 인덱스
 
         Returns:
-            self.tier_list (EnergyTier): tier based on argument index
+            self.tier_list (EnergyTier): tier based on argument index / 인수 인덱스를 기반으로 한 티어 
 
         """
         return self.tier_list[number]
@@ -49,7 +49,7 @@ class Period:
     def add(self, tier):
         """"
         Args:
-            tier (EnergyTier): new tier to be appended to tier_list
+            tier (EnergyTier): new tier to be appended to tier_list / tier_list에 추가할 새로운 티어
 
         """
         self.tier_list.append(tier)
@@ -65,6 +65,7 @@ class Period:
     def get_highest_rate(self):
         """
         Sets the highest rate out of the tier_list
+        tier_list 중에서 최고 요금을 설정
 
         """
         for tier in self.tier_list:
