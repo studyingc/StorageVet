@@ -45,7 +45,7 @@ SATURDAY = 5
 
 class DemandResponse(ValueStream):
     """ Demand response program participation. Each service will be daughters of the ValueStream class.
-        수요 반응 프로그램 참여
+        수요 반응 프로그램 참여를 위한 클래스. 각 서비스는 Value Stream클래스의 하위 클래스로 정의될 것. 
     """
 
     def __init__(self, params):
@@ -128,12 +128,13 @@ class DemandResponse(ValueStream):
     def grow_drop_data(self, years, frequency, load_growth):
         """ Update variable that hold timeseries data after adding growth data. These method should be called after
         add_growth_data and before the optimization is run.
-        최적화가 실행되기 전에 시계열 데이터를 보관하는 변수를 업데이트
+        성장 데이터를 추가한 후 시계열 데이터를 보유하는 변수를 업데이트합니다. 
+        이러한 메서드는 add_growth_data 이후에 최적화를 실행하기 전에 호출해야 합니다.
 
         Args:
-            years (List): list of years for which analysis will occur on
-            frequency (str): period frequency of the timeseries data
-            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation
+            years (List): list of years for which analysis will occur on / 분석이 진행될 연도 목록
+            frequency (str): period frequency of the timeseries data / 시계열 데이터의 주기 빈도
+            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation / 시뮬레이션에서의 부하 성장률의 백분율값
 
 
         """
@@ -162,9 +163,11 @@ class DemandResponse(ValueStream):
     def calculate_system_requirements(self, der_lst):
         """ Calculate the system requirements that must be meet regardless of what other value streams are active
         However these requirements do depend on the technology that are active in our analysis
-        시스템 요구 사항을 계산
+    시스템 요구 사항을 계산합니다. 다른 가치 스트림이 활성화되었는지에 관계없이 충족되어야 하는 요구 사항이지만,
+    이러한 요구 사항은 분석에서 활성화된 기술에 따라 달라집니다.
         Args:
             der_lst (list): list of the initialized DERs in our scenario
+            시나리오에서 초기화된 DER의 목록.
 
         """
        # 최대 방전 가능량 계산
@@ -198,14 +201,17 @@ class DemandResponse(ValueStream):
     def day_ahead_event_scheduling(self):
         """ If Dr events are scheduled with the STORAGE operator the day before the event, then the operator knows
         exactly when these events will occur.
-
+        만약 Dr이벤트가 전일에 Storage operator와 예약되었다면, operator는 이러한 이벤트가 정확히 언제 발생할지 알고 있다.
+        
         We need to make sure that the storage can perform, IF called upon, by making the battery can discharge atleast enough
         to meet the qualifying capacity and reserving enough energy to meet the full duration of the event
-      우리는 저장소가 호출되면 수행할 수 있도록, 최소한 자격 용량을 충족시키기 위해 배터리가 충전할 수 있을 정도로 충분하게 방전할 수 있고,
-    이벤트의 전체 기간을 충족시키기 위해 충분한 에너지를 예약할 수 있어야 합니다.
+        우리는 저장소가 호출되면 수행할 수 있도록, 최소한 자격 용량을 충족시키기 위해 배터리가 충전할 수 있을 정도로 충분하게 방전할 수 있고,
+        이벤트의 전체 기간을 충족시키기 위해 충분한 에너지를 예약할 수 있어야 합니다.
+    
         START_HOUR is required. A user must also provide either END_HOUR or LENGTH
-
-        Returns: index for when the qualifying capacity must apply
+        START_HOUR는 필수입니다. 사용자는 END_HOUR 또는 LENGTH 중 하나를 제공해야 합니다.
+         
+        Returns: index for when the qualifying capacity must apply / 자격 용량을 적용해야 하는 인덱스
 
         """
         index = self.system_load.index
@@ -262,11 +268,13 @@ class DemandResponse(ValueStream):
         """ If the DR events are scheduled the day of, then the STORAGE operator must prepare for an event to occur
         everyday, to start at any time between the program START_HOUR and ending on END_HOUR for the duration of
         LENGTH.
-
+    DR 이벤트가 당일에 예약되면, STORAGE 연산자는 매일 언제든지 프로그램 START_HOUR에서 시작하여
+    END_HOUR에 끝나는 LENGTH 기간 동안 이벤트가 발생할 것으로 준비해야 합니다.
+    
         In this case there must be a power reservations because the storage might or might not be called, so there must
         be enough power capacity to provide for all services.
-        모든 서비스를 제공할 충분한 전력 용량이 있어야 합니다.
-        Returns: index for when the qualifying capacity must apply
+        이 경우 저장소가 호출될 수도 있고 아닐 수도 있으므로 모든 서비스를 위해 충분한 전력 용량이 있어야 합니다.
+        Returns: index for when the qualifying capacity must apply / qc를 적용해야하는 인덱스
 
         """
 
@@ -290,8 +298,8 @@ class DemandResponse(ValueStream):
         """
 
         Args:
-            der_lst (list): list of the initialized DERs in our scenario
-            length (int): length of the event
+            der_lst (list): list of the initialized DERs in our scenario / 시나리오에서 초기화된 DER의 목록
+            length (int): length of the event / 이벤트의 기간
 
         NOTE: RA has this same method too  -HN
 
@@ -302,9 +310,9 @@ class DemandResponse(ValueStream):
 
     def qualifying_energy(self):
         """ Calculated the qualifying energy to be able to participate in an event.
-
+            이벤트에 참여할 수 있도록 qc를 계산합니다.
         This function should be called after calculating the qualifying commitment.
-
+        이 함수는 qc을 계산한 후에 호출되어야 합니다.
         """
         qe = self.qc * self.length  # qualifying energy timeseries dataframe
 
@@ -316,14 +324,13 @@ class DemandResponse(ValueStream):
         self.qe = qe.loc[mask] # 시계열 데이터프레임 qe에서 조건(mask)을 충족하는 부분만을 선택
 
     def p_reservation_discharge_up(self, mask):
-        """ the amount of discharge power in the up direction (supplying power up into the grid) that
-        needs to be reserved for this value stream
-
+        """ the amount of discharge power in the up direction (supplying power up into the grid) that needs to be reserved for this value stream
+            이 value stream에 대해 예약하는 방향(그리드로 전력을 공급하는)의 방전 전력  
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series data included
-                    in the subs data set
+                    in the subs data set /subs data set에 포함된 시계열 데이터에 해당하는 인덱스에 대해 참인 부울 배열 
 
-        Returns: CVXPY parameter/variable
+        Returns: CVXPY parameter/variable / CVXPY 매개변수/변수
 
         """
         if not self.day_ahead:
@@ -345,15 +352,16 @@ class DemandResponse(ValueStream):
 
     def proforma_report(self, opt_years, apply_inflation_rate_func, fill_forward_func, results):
         """ Calculates the proforma that corresponds to participation in this value stream
-
+            이 Value Stream 참여에 해당하는 Proforma를 계산
         Args:
-            opt_years (list): list of years the optimization problem ran for
+            opt_years (list): list of years the optimization problem ran for / 최적화 문제가 실행된 연도 목록
             apply_inflation_rate_func:
             fill_forward_func:
-            results (pd.DataFrame): DataFrame with all the optimization variable solutions
+            results (pd.DataFrame): DataFrame with all the optimization variable solutions / 모든 최적화 변수 솔루션을 포함하는 DataFrame
+
 
         Returns: A tuple of a DateFrame (of with each year in opt_year as the index and the corresponding
-        value this stream provided)
+        value this stream provided) /  opt_year을 인덱스로 가지고 해당 Value Stream 이 제공한 값이 있는 DataFrame의 튜플
 
         """
         proforma = ValueStream.proforma_report(self, opt_years, apply_inflation_rate_func,
@@ -390,9 +398,9 @@ class DemandResponse(ValueStream):
 
     def timeseries_report(self):
         """ Summaries the optimization results for this Value Stream.
-
+            이 Value Stream 에 대한 최적화 결과 요
         Returns: A timeseries dataframe with user-friendly column headers that summarize the results
-            pertaining to this instance
+            pertaining to this instance / 해당 인스턴스와 관련된 결과를 요약하는 사용자 친화적인 열 헤더를 가진 시계열 DataFrame
 
         """
         report = pd.DataFrame(index=self.system_load.index)
@@ -409,8 +417,8 @@ class DemandResponse(ValueStream):
 
     def monthly_report(self):
         """  Collects all monthly data that are saved within this object
-
-        Returns: A dataframe with the monthly input price of the service
+             이 객체 내에 저장된 모든 월간 데이터를 수집
+        Returns: A dataframe with the monthly input price of the service / 서비스의 월간 입력 가격을 포함하는 DataFrame
 
         """
 
@@ -425,10 +433,11 @@ class DemandResponse(ValueStream):
         """ Updates attributes related to price signals with new price signals that are saved in
         the arguments of the method. Only updates the price signals that exist, and does not require all
         price signals needed for this service.
-
+        새 가격 신호로 관련된 속성을 업데이트합니다. 이 메서드의 인수에 저장된 새 가격 신호로만 가격 신호를 업데이트하며,
+    이 서비스에 필요한 모든 가격 신호가 필요하지 않습니다.
         Args:
-            monthly_data (DataFrame): monthly data after pre-processing
-            time_series_data (DataFrame): time series data after pre-processing
+            monthly_data (DataFrame): monthly data after pre-processing / 전처리 후 월간 데이터
+            time_series_data (DataFrame): time series data after pre-processing / 전처리 후 시계열 데이터
 
         """
 
