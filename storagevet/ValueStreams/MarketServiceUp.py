@@ -279,9 +279,13 @@ class MarketServiceUp(ValueStream):
         return proforma
 
     def update_price_signals(self, monthly_data, time_series_data):
-        """ Updates attributes related to price signals with new price signals that are saved in
-        the arguments of the method. Only updates the price signals that exist, and does not
-        require all price signals needed for this service.
+        """ 새로운 가격 신호를 사용하여 가격 신호와 관련된 속성을 업데이트합니다. 
+            이 함수는 서비스에 필요한 모든 가격 신호를 갖추지 않아도 되며, 존재하는 가격 신호만 업데이트
+
+            try-except 블록을 사용하여 다음 작업을 수행합니다.
+            time_series_data에서 {self.name} Price ($/kW) 열을 추출하여 self.price 속성에 업데이트합니다.
+            만약 해당 열이 존재하지 않는다면(KeyError 예외 발생), 아무 작업도 수행하지 않습니다.
+
 
         Args:
             monthly_data (DataFrame): monthly data after pre-processing
