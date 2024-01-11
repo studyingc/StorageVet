@@ -46,12 +46,12 @@ SATURDAY = 5
 
 class EnergyTimeShift(ValueStream):
     """ Retail energy time shift. A behind the meter service.
-
+        소매용 에너지 시간 이동. 계량기 뒤의 서비스
     """
 
     def __init__(self, params):
         """ Generates the objective function, finds and creates constraints.
-
+            목적 함수를 생성하고 제약 조건을 찾고 생성
         Args:
             params (Dict): input parameters
         """
@@ -67,11 +67,14 @@ class EnergyTimeShift(ValueStream):
         """ Adds data by growing the given data OR drops any extra data that might have slipped in.
         Update variable that hold timeseries data after adding growth data. These method should be called after
         add_growth_data and before the optimization is run.
-
+        주어진 데이터를 성장시켜 데이터를 추가하거나 실수로 추가된 데이터를 삭제합니다.
+    성장 데이터를 추가한 후 시계열 데이터를 보관하는 변수를 업데이트합니다.
+    이 메서드는 add_growth_data 후에 호출되어야 하며 최적화가 실행되기 전에 실행합니다.
+    
         Args:
-            years (List): list of years for which analysis will occur on
-            frequency (str): period frequency of the timeseries data
-            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation
+            years (List): list of years for which analysis will occur on / 분석이 진행될 연도 목록
+            frequency (str): period frequency of the timeseries data / 시계열 데이터의 주기 빈도
+            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation / 시뮬레이션에서의 부하 성장률의 백분율
 
 
         """
@@ -120,7 +123,7 @@ class EnergyTimeShift(ValueStream):
 
     def objective_function(self, mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, annuity_scalar=1):
         """ Generates the full objective function, including the optimization variables.
-        최적화 문제를 위한 목적 함수를 생성
+       최적화 변수를 포함한 전체 목적 함수 생 
 
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series data included
@@ -134,7 +137,7 @@ class EnergyTimeShift(ValueStream):
 
         Returns:
             A dictionary with expression of the objective function that it affects. This can be passed into the cvxpy solver.
-
+            목적 함수에 영향을 주는 목적 함수 표현식을 포함하는 딕셔너리. 이것은 cvxpy 솔버에 전달될 수 있음.
         """
         # 'mask'에 포함된 시계열 데이터의 수를 계산하여 'size'에 할당
         size = sum(mask)
@@ -152,10 +155,10 @@ class EnergyTimeShift(ValueStream):
 
     def timeseries_report(self):
         """ Summaries the optimization results for this Value Stream.
-
+            이 Value Stream에 대한 최적화 결과를 요
         Returns: A timeseries dataframe with user-friendly column headers that summarize the results
             pertaining to this instance
-
+       해당 인스턴스와 관련된 결과를 요약하는 사용자 친화적인 열 헤더를 가진 시계열 DataFrame
         """
          # 빈 데이터프레임을 생성하고 인덱스를 energy price의 인덱스로 설정
         report = pd.DataFrame(index=self.price.index)
@@ -167,10 +170,9 @@ class EnergyTimeShift(ValueStream):
         """ Calculates any service related dataframe that is reported to the user.
         사용자에게 보고될 다양한 서비스 관련 데이터프레임을 계산
 
-        Returns: dictionary of DataFrames of any reports that are value stream specific
-            keys are the file name that the df will be saved with
-
-        """
+        Returns: dictionary of DataFrames of any reports that are value stream specific keys are the file name that the df will be saved with
+         
+        """ 
         # 결과를 저장할 딕셔너리 생성
         df_dict = dict()
 
