@@ -79,7 +79,7 @@ class CAES(EnergyStorage):
         pass
         # 초기 변질 모듈을 초기화하는 데 사용되는 것으로 보이지만, 여기에서는 아무런 동작을 수행하지 않고 넘어가도록 설정
 
-    def objective_function(self, mask, annuity_scalar=1): # 주어진 제어 마스크에 대한 연료 비용 및 O&M 비용을 생성
+    def objective_function(self, mask, annuity_scalar=1): # 주어진 제어 마스크에 대한 연료 비용 및 O&M 비용 목적 함수을 생성
         """ Generates the objective costs for fuel cost and O&M cost
 
          Args:
