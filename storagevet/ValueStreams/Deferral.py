@@ -44,14 +44,14 @@ from storagevet.Library import truncate_float
 
 class Deferral(ValueStream):
     """ Investment deferral. Each service will be daughters of the PreDispService class.
-
+        투자 연기. 각 서비스는 PreDispService 클래스의 하위 클래스가 될 것입니다.
     """
 
     def __init__(self, params):
         """ Generates the objective function, finds and creates constraints.
-
+            목적 함수 및 제약 조건 찾아 생성
           Args:
-            params (Dict): input parameters
+            params (Dict): input parameters / 입력 매개변수수
         """
 
         # generate the generic service object
@@ -78,7 +78,7 @@ class Deferral(ValueStream):
         for any infeasible constraints on the system.
         특정 시점에서 전력망 및 에너지 저장 시스템이 계획된 부하 한계를 초과하는지 확인하는 함수.
         The goal of this function is to predict the year that storage will fail to deferral a T&D asset upgrade.
-
+        이 함수의 목표는 전력 및 에너지 저장 시스템이 T&D 자산 업그레이드를 연기하지 못할 연도를 예측하는 것
         Only runs if Deferral is active.
 
         Args:
@@ -88,7 +88,7 @@ class Deferral(ValueStream):
             opt_years:
             def_load_growth:
 
-        Returns: new list of optimziation years
+        Returns: new list of optimziation years / 최적화 연도의 새로운 목록
 
         """
         # 첫 번째 재구축 실패 연도를 찾는 중임을 사용자에게 알림
@@ -228,19 +228,24 @@ class Deferral(ValueStream):
         """
         This function takes in a vector of storage power requirements (negative=charging and positive=discharging) [=] kW
         that are required to perform the deferral as well as a time step (tstep) [=] hrs
-
+        이 함수는 연료전지 차원에서 필요한 저장소 전력 요구사항의 벡터(음수=충전 및 양수=방전) 및 시간 단계(tstep)를 입력으로 받습니다. [=] kW
+        
         Args:
-            tstep (float): timestep of the data in hours
-            rte_lst (list): round trip efficiency of storage
-            sto_p_req (list, ndarray): storage power requirement
+            tstep (float): timestep of the data in hours / 데이터의 시간 간격(시간 단계)
+            rte_lst (list): round trip efficiency of storage / 저장소의 라운드 트립 효율
+            sto_p_req (list, ndarray): storage power requirement / 저장소의 라운드 트립 효율
 
         Returns:
             how much the energy in the ESS needs to wander as a function of time,
             theoretical dispatch of the ESS to meet on feeder limits
+        시간의 함수로 ESS의 에너지가 얼마나 흩어져야 하는지,
+        ESS의 이론적인 배치로 feeder 제한 충족
 
         Notes:
             This algorithm can reliably find the last year deferral is possible, however the problem might still
             be found INFEASIBLE if the ESS cannot use it's full range of SOC (ie. if LLSOC is too high or ULSOC is too low)
+        이 알고리즘은 마지막 연도를 신뢰성 있게 찾아낼 수 있지만, 아래의 경우 여전히 문제가 실현 불가능할 수 있습니다
+        ESS가 SOC의 전체 범위를 사용할 수 없는 경우(즉, LLSOC가 너무 높거나 ULSOC가 너무 낮은 경우)
         """
         # Loop through time steps. If the storage is forced to dispatch from the constraint,
         # return to nominal SOC as soon as possible after.
@@ -284,12 +289,13 @@ class Deferral(ValueStream):
         """ Adds data by growing the given data OR drops any extra data that might have slipped in.
         Update variable that hold timeseries data after adding growth data. These method should be called after
         add_growth_data and before the optimization is run.
+        주어진 데이터를 성장시키거나 추가된 데이터를 삭제하여 데이터를 업데이트 해야 함.
         성장 데이터를 추가한 후 최적화를 실행하기 전에 이러한 메서드를 호출해야 함. 
 
         Args:
-            years (List): list of years for which analysis will occur on
-            frequency (str): period frequency of the timeseries data
-            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation
+            years (List): list of years for which analysis will occur on / 분석이 수행될 연도의 목록
+            frequency (str): period frequency of the timeseries data / 시계열 데이터의 주기
+            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation / 이 시뮬레이션의 부하 성장률의 백분율 값
 
         """
         # 데이터 성장 및 불필요한 데이터 삭제
@@ -301,8 +307,8 @@ class Deferral(ValueStream):
         저장장치의 T&D(Technology & Development) 장비 업그레이드를 연기할 수 있는 마지막 해를 설정합니다
 
         Args:
-            last_year (int): The last year storage can defer an T&D equipment upgrade
-            failed_year (int): the year that deferring an upgrade will fail
+            last_year (int): The last year storage can defer an T&D equipment upgrade / 저장장치가 T&D 장비 업그레이드를 연기할 수 있는 마지막 연도
+            failed_year (int): the year that deferring an upgrade will fail / 업그레이드 연기가 실패할 연도
         """
         self.last_year = last_year
         self.year_failed = failed_year
@@ -323,7 +329,7 @@ class Deferral(ValueStream):
             combined_rating (Dictionary): the combined rating of each DER class type
 
         Returns:
-            An empty list (for aggregation of later constraints)
+            An empty list (for aggregation of later constraints) / 나중에 제약조건을 집계하기 위한 빈 목록
         """
         # adding constraints to ensure power dispatch does not violate thermal limits of transformer deferred
         # only include them if deferral is not going to fail
@@ -348,10 +354,10 @@ class Deferral(ValueStream):
 
     def timeseries_report(self):
         """ Summaries the optimization results for this Value Stream.
-
+            이 Value Stream에 대한 최적화 결과 요
         Returns: A timeseries dataframe with user-friendly column headers that summarize the results
             pertaining to this instance
-
+            이 인스턴스와 관련된 결과를 요약하는 사용자 친화적인 열 헤더를 가진 시계열 데이터프레임
         """
         # 결과를 저장할 데이터프레임 생성
         report = pd.DataFrame(index=self.load.index)
@@ -376,14 +382,14 @@ class Deferral(ValueStream):
 
     def proforma_report(self, opt_years, apply_inflation_rate_func, fill_forward_func, results):
         """ Calculates the proforma that corresponds to participation in this value stream
-
+            이 Value Stream 에 참여하는 데 해당하는 proforma 계
         Args:
             opt_years (list): list of years the optimization problem ran for
             apply_inflation_rate_func:
             fill_forward_func:
-            results (pd.DataFrame): DataFrame with all the optimization variable solutions
+            results (pd.DataFrame): DataFrame with all the optimization variable solutions 
 
-        Returns: A tuple of a DateFrame (of with each year in opt_year as the index and the corresponding
+        Returns: A tuple of a DateFrame (of with each year in opt_year as the index and the corresponding / opt_year의 각 연도를 인덱스로 하는 DataFrame
         value this stream provided)
 
         """
@@ -412,8 +418,8 @@ class Deferral(ValueStream):
     def drill_down_reports(self, monthly_data=None, time_series_data=None, technology_summary=None, **kwargs):
         """ Calculates any service related dataframe that is reported to the user.
             사용자에게 보고된 모든 서비스 관련 DataFrame을 계산합니다.
-        Returns: dictionary of DataFrames of any reports that are value stream specific
-            keys are the file name that the df will be saved with
-
+        Returns: dictionary of DataFrames of any reports that are value stream specific keys are the file name that the df will be saved with
+        이 메서드는 Value Stream에 특화된 보고서 데이터프레임을 담은 딕셔너리를 반환합니다. 딕셔너리의 키는 해당 데이터프레임이 저장될 파일의 이름을 나타내며, 
+        이를 통해 각 데이터프레임이 식별됨. 
         """
         return {'deferral_results': self.deferral_df}
