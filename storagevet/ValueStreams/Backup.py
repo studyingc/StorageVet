@@ -41,12 +41,12 @@ import numpy as np
 # 백업 전력 서비스에 대한 구체적인 동작 정의
 class Backup(ValueStream):
     """ Backup Power Service. Each service will be daughters of the ValueStream class.
-
+        백업 전력 서비스. 각 서비스는 ValueStream 클래스의 하위 클래스
     """
 
     def __init__(self, params):
         """ Generates the objective function, finds and creates constraints.
-
+            객체 함수 생성하고 제약 조건 찾아 생성
           Args:
             params (Dict): input parameters
         """
@@ -89,9 +89,10 @@ class Backup(ValueStream):
     def calculate_system_requirements(self, der_lst):
         """ Calculate the system requirements that must be meet regardless of what other value streams are active
         However these requirements do depend on the technology that are active in our analysis
-
+        다른 Value Stream이 활성화되는지 여부와 관계없이 시스템 요구사항을 계산
+        그러나 이러한 요구사항은 분석에서 활성화된 기술에 따라 달라짐.
         Args:
-            der_lst (list): list of the initialized DERs in our scenario
+            der_lst (list): list of the initialized DERs in our scenario / 시나리오에서 초기화된 DER의 목록
 
         """
         # backup energy adds a minimum energy level
@@ -99,9 +100,9 @@ class Backup(ValueStream):
 
     def monthly_report(self):
         """  Calculates the monthly cost or benefit of the service and adds them to the monthly financial result dataframe
-
+             서비스의 월간 비용 또는 이익을 계산하고 이를 월간 재무 결과 데이터프레임에 추가
         Returns: A dataframe with the monthly input price of the service and the calculated monthly value in respect
-                for each month
+                for each month / 월간 서비스의 입력 가격 및 각 월에 대한 계산된 월간 가치를 나타내는 데이터프레임
 
         """
      
@@ -114,12 +115,13 @@ class Backup(ValueStream):
 
     def proforma_report(self, opt_years, apply_inflation_rate_func, fill_forward_func, results):
         """ Calculates the proforma that corresponds to participation in this value stream
-
+            이 Value Stream 참여에 해당하는 proforma(재무상태) 계산
         Args:
-            opt_years (list): list of years the optimization problem ran for
+            opt_years (list): list of years the optimization problem ran for / 최적화 문제를 실행한 연도의 목록
             apply_inflation_rate_func:
             fill_forward_func:
-            results (pd.DataFrame): DataFrame with all the optimization variable solutions
+            results (pd.DataFrame): DataFrame with all the optimization variable solutions / 모든 최적화 변수 솔루션을 포함한 DataFrame
+
 
         Returns: A tuple of a DateFrame (of with each year in opt_year as the index and the corresponding
         value this stream provided)
@@ -153,9 +155,9 @@ class Backup(ValueStream):
 
     def timeseries_report(self):
         """ Summaries the optimization results for this Value Stream.
-
+            이 Value Stream에 대한 최적화 결과를 요약
         Returns: A timeseries dataframe with user-friendly column headers that summarize the results
-            pertaining to this instance
+            pertaining to this instance / 이 인스턴스와 관련된 결과를 요약하는 사용자 친화적인 열 헤더를 가진 시계열 데이터프레임
 
         """
         # timeseries 데이터프레임 초기화
@@ -169,10 +171,12 @@ class Backup(ValueStream):
         """ Updates attributes related to price signals with new price signals that are saved in
         the arguments of the method. Only updates the price signals that exist, and does not require all
         price signals needed for this service.
+        메서드의 인수로 저장된 새로운 가격 신호로 관련된 속성을 업데이트합니다.
+    이 서비스에 필요한 모든 가격 신호를 필요로하지 않으며, 실제로 존재하는 가격 신호만 업데이트합니다.
 
         Args:
-            monthly_data (DataFrame): monthly data after pre-processing
-            time_series_data (DataFrame): time series data after pre-processing
+            monthly_data (DataFrame): monthly data after pre-processing / 전처리 후의 월간 데이터
+            time_series_data (DataFrame): time series data after pre-processing / 전처리 후의 시계열 데이터
 
         """
         try:
