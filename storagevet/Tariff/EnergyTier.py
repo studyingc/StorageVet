@@ -45,9 +45,9 @@ class Tier:
     def tostring(self):
         """
         Pretty print all necessary tier information
-
+        필요한 모든 티어 정보를 출력
         """
-        # 최대 사용량 정보 출
+        # 최대 사용량 정보 출력
         if self.max is not None:
             if self.unit is not None:
                 print("Tier " + str(self.number) + ": Max Usage: " + str(self.max) + " " + self.unit)
@@ -72,12 +72,12 @@ class Tier:
             else:
                 print("Tier " + str(self.number) + ": Sell: $" + str(self.sell))
              
-    # 해당 티어의 요금 비율을 반환하는 기능
+    
     def get_rate(self):
         """
         Returns:
             self.rate (Int): this tier's rate
-
+        # 해당 티어의 요금 비율을 반환하는 기능
         """
         return self.rate
 
