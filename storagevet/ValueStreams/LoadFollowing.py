@@ -44,22 +44,26 @@ class LoadFollowing(MarketServiceUpAndDown):
     """ Load Following.
 
     """
-
+   # LoadFollowing 클래스를 MarketServiceUpAndDown 클래스의 하위 클래스로 정의
     def __init__(self, params):
         """ Generates the objective function, finds and creates constraints.
 
         Args:
             params (Dict): input parameters
         """
-        MarketServiceUpAndDown.__init__(self, 'LF', 'Load Following', params)    """MarketServiceUpAndDown 클래스의 생성자를 호출하여 해당 클래스의 초기화를 먼저 수행/params라는 딕셔너리 형태의 입력 매개변수를 받음"""
-        self.u_ts_constraints = params.get('u_ts_constraints', False)            """u_ts_constraints 속성 설정"""
-        self.d_ts_constraints = params.get('d_ts_constraints', False)            """d_ts_constraints 속성 설정"""
+        MarketServiceUpAndDown.__init__(self, 'LF', 'Load Following', params)    # MarketServiceUpAndDown 클래스의 생성자를 호출하여 해당 클래스의 초기화를 먼저 수행/params라는 딕셔너리 형태의 입력 매개변수를 받음
+        self.u_ts_constraints = params.get('u_ts_constraints', False)            # u_ts_constraints 속성 설정, 없으면 False 반환
+        self.d_ts_constraints = params.get('d_ts_constraints', False)            # d_ts_constraints 속성 설정, 없으면 Fales 반
         if self.u_ts_constraints:
             self.regu_max = params['lf_u_max']
             self.regu_min = params['lf_u_min']
+        # u_ts_constraints가 True인 경우에 실행되는 조건문
+        # regu_max와 regu_min 속성 설정하고, params에서 해당 값을 가져옴
         if self.d_ts_constraints:
             self.regd_max = params['lf_d_max']
             self.regd_min = params['lf_d_min']
+        # d_ts_constraints가 True인 경우에 실행되는 조건문
+        # regd_max와 regd_min 속성 설정하고, params에서 해당 값을 가져옴
 
         if self.dt > 0.25:                                                    """dt가 0.25보다 클 경우 경고메시지 출력"""
             TellUser.warning("WARNING: using Load Following Service and " +
@@ -78,16 +82,17 @@ class LoadFollowing(MarketServiceUpAndDown):
                 loads in this simulation
 
         """
-        super().grow_drop_data(years, frequency, load_growth)                     """부모 클래스인 MarketServiceUpAndDown의 grow_drop_data 메서드를 호출하여 해당 메서드 먼저 실행"""
-        self.eou_avg = Lib.fill_extra_data(self.eou_avg, years, 0, frequency)     """eou_avg변수에 대해 Lib.fill_extra_data 함수를 사용하여 추가된 데이터를 0으로 채움"""
-        self.eou_avg = Lib.drop_extra_data(self.eou_avg, years)                   """eou_avg 변수에 대해 Lib.drop_extra_data 함수를 사용하여 추가된 데이터 중 불필요한 데이터를 삭제"""
+        # MarketServiceUpAndDown의 grow_drop_data 메서드를 호출하여 해당 메서드 먼저 실행
+        super().grow_drop_data(years, frequency, load_growth)                     
+        self.eou_avg = Lib.fill_extra_data(self.eou_avg, years, 0, frequency)    # eou_avg 변수에 대해 Lib.fill_extra_data 함수를 사용하여 추가된 데이터를 0으로 채움
+        self.eou_avg = Lib.drop_extra_data(self.eou_avg, years)                  # eou_avg 변수에 대해 Lib.drop_extra_data 함수를 사용하여 추가된 데이터 중 불필요한 데이터를 삭제
 
-        self.eod_avg = Lib.fill_extra_data(self.eod_avg, years, 0, frequency)
-        self.eod_avg = Lib.drop_extra_data(self.eod_avg, years)
+        self.eod_avg = Lib.fill_extra_data(self.eod_avg, years, 0, frequency)    # eod_avg 변수에 대해 Lib.fill_extra_data 함수를 사용하여 추가된 데이터를 0으로 채움
+        self.eod_avg = Lib.drop_extra_data(self.eod_avg, years)                  # eod_avg 변수에 대해 Lib.drop_extra_data 함수를 사용하여 추가된 데이터 중 불필요한 데이터를 삭제
 
         if self.u_ts_constraints:
             self.regu_max = Lib.fill_extra_data(self.regu_max, years,
-                                                0, frequency)
+                                                0, frequency)                    
             self.regu_max = Lib.drop_extra_data(self.regu_max, years)
 
             self.regu_min = Lib.fill_extra_data(self.regu_min, years,
