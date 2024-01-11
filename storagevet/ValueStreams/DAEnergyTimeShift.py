@@ -47,9 +47,9 @@ class DAEnergyTimeShift(ValueStream):
 
     def __init__(self, params):
         """ Generates the objective function, finds and creates constraints.
-
+            목적 함수를 생성하고 제약 조건을 찾아 생성
         Args:
-            params (Dict): input parameters
+            params (Dict): input parameters / 입력 매개변수
         """
         # ValueStream 클래스의 생성자 호출
         ValueStream.__init__(self, 'DA', params)
@@ -62,11 +62,14 @@ class DAEnergyTimeShift(ValueStream):
         """ Adds data by growing the given data OR drops any extra data that might have slipped in.
         Update variable that hold timeseries data after adding growth data. These method should be called after
         add_growth_data and before the optimization is run.
+       주어진 데이터를 성장시키거나 추가된 데이터를 삭제하여 데이터를 업데이트.
+       성장 데이터를 추가한 후, 최적화가 실행되기 전에 이 메서드를 호출.
 
         Args:
-            years (List): list of years for which analysis will occur on
-            frequency (str): period frequency of the timeseries data
-            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation
+            years (List): list of years for which analysis will occur on / 분석이 수행될 연도의 목록
+            frequency (str): period frequency of the timeseries data / 시계열 데이터의 주기
+            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation /이 시뮬레이션의 부하 성장률의 백분율
+
 
 
         """
@@ -76,10 +79,10 @@ class DAEnergyTimeShift(ValueStream):
 
     def objective_function(self, mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, annuity_scalar=1):
         """ Generates the full objective function, including the optimization variables.
-
+            최적화 변수를 포함한 전체 목적 함수를 생성
         Args:
             mask (DataFrame): A boolean array that is true for indices corresponding to time_series data included
-                in the subs data set
+                in the subs data set 
             tot_variable_gen (Expression): the sum of the variable/intermittent generation sources
             load_sum (list, Expression): the sum of load within the system
             generator_out_sum (list, Expression): the sum of conventional generation within the system
@@ -89,6 +92,7 @@ class DAEnergyTimeShift(ValueStream):
 
         Returns:
             A dictionary with the portion of the objective function that it affects, labeled by the expression's key. Default is to return {}.
+            영향을 미치는 목적 함수의 일부분을 나타내는 표현의 키로 레이블이 지정된 딕셔너리. 기본값은 {}를 반환
         """
         # DA 가격 정보를 행렬 형태의 파라미터로 생성
         # CVXPY 라이브러리의 cvx.Parameter를 사용하여 DA 가격 정보를 행렬 형태의 파라미터로 생성하는 부분
@@ -102,10 +106,10 @@ class DAEnergyTimeShift(ValueStream):
 
     def timeseries_report(self):
         """ Summaries the optimization results for this Value Stream.
-
+            이 Value Stream에 대한 최적화 결과를 요약
         Returns: A timeseries dataframe with user-friendly column headers that summarize the results
             pertaining to this instance
-
+            이 인스턴스와 관련된 결과를 요약하는 사용자 친화적인 열 헤더를 가진 시계열 데이터프레임
         """
         # 결과를 저장할 빈 데이터프레임 생성
         report = pd.DataFrame(index=self.price.index)
@@ -118,10 +122,9 @@ class DAEnergyTimeShift(ValueStream):
 
     def drill_down_reports(self, monthly_data=None, time_series_data=None, technology_summary=None, **kwargs):
         """ Calculates any service related dataframe that is reported to the user.
-
-        Returns: dictionary of DataFrames of any reports that are value stream specific
-            keys are the file name that the df will be saved with
-
+            사용자에게 보고되는 모든 서비스 관련 데이터프레임을 계산
+        Returns: dictionary of DataFrames of any reports that are value stream specific keys are the file name that the df will be saved with
+        Value Stream 특정보고서의 DataFrame들을 담고 있는 딕셔너리를 생성. 이 딕셔너리의 키는 해당 DataFrame이 파일로 저장될 때 사용될 파일 이름. 
         """
         # 데이터프레임 딕셔너리 초기화
         df_dict = dict()
@@ -147,16 +150,19 @@ class DAEnergyTimeShift(ValueStream):
 
     def proforma_report(self, opt_years, apply_inflation_rate_func, fill_forward_func, results):
         """ Calculates the proforma that corresponds to participation in this value stream
-
+             이 Value Stream에 참여하는데 해당하는 proforma 계산
         Args:
-            opt_years (list): list of years the optimization problem ran for
+            opt_years (list): list of years the optimization problem ran for / 최적화 문제가 실행된 연도 목록
             apply_inflation_rate_func:
             fill_forward_func:
-            results (pd.DataFrame): DataFrame with all the optimization variable solutions
+            results (pd.DataFrame): DataFrame with all the optimization variable solutions / 모든 최적화 변수 솔루션을 포함한 DataFrame
 
         Returns: A tuple of a DateFrame (of with each year in opt_year as the index and the corresponding
         value this stream provided), a list (of columns that remain zero), and a list (of columns that
         retain a constant value over the entire project horizon).
+
+         opt_year의 각 연도를 인덱스로 하는 DataFrame (이 값 스트림이 제공한 값과 해당 값에 상응하는),
+        값이 여전히 0인 열의 목록, 프로젝트 전체 기간 동안 일정한 값이 유지되는 열의 목록을 담은 튜플
         """
         # 상위 클래스 메서드를 호출하여 프로포마 DataFrame을 가져옴.
         proforma = super().proforma_report(opt_years, apply_inflation_rate_func,
@@ -180,10 +186,12 @@ class DAEnergyTimeShift(ValueStream):
         """ Updates attributes related to price signals with new price signals that are saved in
         the arguments of the method. Only updates the price signals that exist, and does not require all
         price signals needed for this service.
+           새로운 가격 신호로 관련된 속성을 업데이트합니다. 이 속성은 메서드의 인수에 저장된 가격 신호로 갱신됩니다.
+    존재하는 가격 신호만을 업데이트하며, 이 서비스에 필요한 모든 가격 신호를 필요로하지 않습니다.
 
         Args:
-            monthly_data (DataFrame): monthly data after pre-processing
-            time_series_data (DataFrame): time series data after pre-processing
+            monthly_data (DataFrame): monthly data after pre-processing / 전처리 후의 월간 데이터
+            time_series_data (DataFrame): time series data after pre-processing / 전처리 후의 시계열 데이터
 
         """
         try:
