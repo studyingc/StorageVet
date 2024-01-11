@@ -96,7 +96,7 @@ class API:
     def print_all(self):
         """
         Prints necessary identifying information of all tariffs that show from result page on OpenEI
-        #OpenEI API 결과페이지에서 표시된 모든 전력 요금에 대한 필수 식별정보를 출력력   
+        # OpenEI API 결과페이지에서 표시된 모든 전력 요금에 대한 필수 식별정보를 출력   
         """
 
      # 초기 카운트 값을 1로 설정
@@ -132,6 +132,7 @@ class API:
     def reset(self):
         """
         Resets tariff's tier values to None; necessary for print_index
+        요금의 티어 값을 none으로 설정; print_index에 필요요
 
         """
 
@@ -145,9 +146,9 @@ class API:
     def print_index(self, index):
         """
         Establishes all periods and tiers of the tariff using period and tier objects
-
+        기간과 티어객체를 사용하여 요금의 티어와 기간을 설정
         Args:
-            index (Int): user input for which tariff they choose
+            index (Int): user input for which tariff they choose / 사용자가 선택한 요금제의 인덱스
 
         """
 
@@ -207,7 +208,7 @@ class API:
     def energy_structure(self):
         """
         Prints energy structure, month and hour schedule of when every period is active, to terminal
-
+        에너지 구조를 터미널에 출력. 각 기간이 활성화되는 월 및 시간 일정을 포함함
         """
        # 주중 및 주말의 에너지 스케줄을 가져옴
         self.energyweekdayschedule = self.tariff["items"][0]["energyweekdayschedule"]
@@ -233,7 +234,7 @@ class API:
     def calendar(self):
         """
         Makes a csv file with weekday schedule, weekend schedule, and the rates of each period
-
+        주중, 주말 스케줄 및 각 기간의 요금을 포함한 CSV 파일 생성성
         """
        # 주중 및 주말 스케줄, 시간 및 월을 나타내는 데이터 정의
        # self.temp_file 파일을 쓰기 모드("w")로 열기
@@ -291,7 +292,7 @@ class API:
     def read_csv(self):
         """
         Reads the csv file back and creates three data frames based on weekday schedule, weekend schedule, and periods
-
+        CSV 파일을 읽어와 주중, 주말 스케줄 및 기간을 기반으로 세 개의 데이터 프레임을 생성성
         """
         with open(self.temp_file, 'r') as inp, open(self.new_file, "w") as out:
             writer = csv.writer(out)
@@ -346,7 +347,7 @@ class API:
     def run(self):
         """
         Runs the program utilizing the functions
-
+        함수들을 활용해 프로그램을 실행
         """
         self.print_all()
         i = int(input("Which tariff would you like to use?..."))
