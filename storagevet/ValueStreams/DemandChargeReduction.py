@@ -52,7 +52,7 @@ class DemandChargeReduction(ValueStream):
 
     def __init__(self, params):
         """ Generates the objective function, finds and creates constraints.
-
+            목적 함수를 생성하고 제약 조건을 찾아 생성
         Args:
             params (Dict): input parameters
         """
@@ -71,14 +71,18 @@ class DemandChargeReduction(ValueStream):
         """ Adds data by growing the given data OR drops any extra data that might have slipped in.
         Update variable that hold timeseries data after adding growth data. These method should be called after
         add_growth_data and before the optimization is run.
-
+    주어진 데이터를 성장시키거나 추가된 데이터를 삭제하여 데이터를 업데이트합니다.
+    성장 데이터를 추가한 후 최적화를 실행하기 전에 이러한 메서드를 호출
+       
         Args:
-            years (List): list of years for which analysis will occur on
-            frequency (str): period frequency of the timeseries data
-            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation
+            years (List): list of years for which analysis will occur on / 분석이 수행될 연도의 목록
+            frequency (str): period frequency of the timeseries data / 시계열 데이터의 주기
+            load_growth (float): percent/ decimal value of the growth rate of loads in this simulation / 이 시뮬레이션의 부하 성장률의 백분율
 
         This function adds billing periods to the tariff that match the given year's structure, but the values have
         a growth rate applied to them. Then it lists them within self.billing_period.
+     이 함수는 주어진 연도의 구조와 일치하는 요금제에 성장율을 적용하여 청구 기간을 추가합니다.
+    그런 다음 이를 self.billing_period 내에 나열합니다.
 
         """
         # 현재 데이터에 대한 연도 가져오기
@@ -166,6 +170,7 @@ class DemandChargeReduction(ValueStream):
 
         Returns:
             A dictionary with the portion of the objective function that it affects, labeled by the expression's key. Default is to return {}.
+            목적함수의 영향을 받는 부분을 표시하는 expression's key별로 레이블이 지정된 사전 . 기본값은 {}을 반환
         """
         # 함수의 어떤 부분이 실행되는 데 얼마나 시간이 걸리는지 확인하고자 할 때 사용됩니다.
         start = time.time()
@@ -228,7 +233,7 @@ class DemandChargeReduction(ValueStream):
             
         Returns: A timeseries dataframe with user-friendly column headers that summarize the results
             pertaining to this instance
-
+           이 인스턴스와 관련된 결과를 요약하는 사용자 친화적인 열 헤더를 가진 시계열 데이터프레임
         """
         report = pd.DataFrame(index=self.billing_period.index)
         report.loc[:, 'Demand Charge Billing Periods'] = self.billing_period
@@ -236,9 +241,8 @@ class DemandChargeReduction(ValueStream):
 
     def drill_down_reports(self, monthly_data=None, time_series_data=None, technology_summary=None, **kwargs):
         """ Calculates any service related dataframe that is reported to the user.
-
-        Returns: dictionary of DataFrames of any reports that are value stream specific
-            keys are the file name that the df will be saved with
-
+            사용자에게 보고된 서비스 관련 데이터프레임을 계산
+        Returns: dictionary of DataFrames of any reports that are value stream specific keys are the file name that the df will be saved with
+        반환값은 값 스트림에 특화된 모든 보고서의 데이터프레임을 포함하는 딕셔너리이며, 키는 각 데이터프레임이 저장될 파일 이름을 나타냄. 
         """
         return {'demand_charges': self.tariff}
