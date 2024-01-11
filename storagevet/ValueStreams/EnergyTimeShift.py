@@ -171,7 +171,7 @@ class EnergyTimeShift(ValueStream):
         사용자에게 보고될 다양한 서비스 관련 데이터프레임을 계산
 
         Returns: dictionary of DataFrames of any reports that are value stream specific keys are the file name that the df will be saved with
-         
+        df가 저장될 파일 이름인 특정 키 value stream 보고서의 특정 데이터프레임의 딕셔너리
         """ 
         # 결과를 저장할 딕셔너리 생성
         df_dict = dict()
