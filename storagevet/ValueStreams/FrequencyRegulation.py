@@ -42,11 +42,12 @@ import storagevet.Library as Lib
 class FrequencyRegulation(MarketServiceUpAndDown):
     """ Frequency Regulation. Each service will be daughters of the ValueStream
     class.
-
+    주파수 제어. 각 서비스는 Valuestream의 하위서비스일것이다.
     """
 
     def __init__(self, params):
         """ Generates the objective function, finds and creates constraints.
+            객체함수 생성 및 제약조건 생성 및 찾음
         Args:
             params (Dict): input parameters
         """
@@ -73,12 +74,14 @@ class FrequencyRegulation(MarketServiceUpAndDown):
         might have slipped in. Update variable that hold timeseries data
         after adding growth data. These method should be called after
         add_growth_data and before the optimization is run.
-
+        데이터를 성장시켜 주거나 실수로 추가로 들어온 데이터를 삭제하여
+        주어진 데이터를 업데이트합니다. 성장 데이터를 추가한 후에
+        최적화가 실행되기 전에 이 메서드를 호출해야 합니다.
         Args:
-            years (List): list of years for which analysis will occur on
-            frequency (str): period frequency of the timeseries data
+            years (List): list of years for which analysis will occur on / 분석이 수행될 연도 목록
+            frequency (str): period frequency of the timeseries data / 시계열 데이터의 주기
             load_growth (float): percent/ decimal value of the growth rate of
-                loads in this simulation
+                loads in this simulation / 시뮬레이션에서의 부하 성장율의 백분율
 
         """
         # 부모 클래스의 메서드 호출
@@ -129,7 +132,7 @@ class FrequencyRegulation(MarketServiceUpAndDown):
 
         Returns:
             An list of constraints for the optimization variables added to
-            the system of equations
+            the system of equations / 최적화 변수에 추가된 방정식 체계의 제약 조건 목록
         """
 
         # 부모 클래스의 constraints 메서드 호출하여 초기화 작업을 수행
@@ -166,10 +169,10 @@ class FrequencyRegulation(MarketServiceUpAndDown):
 
     def timeseries_report(self):
         """ Summaries the optimization results for this Value Stream.
-
+        이 Value Stream에 대한 최적화 결과 요약
         Returns: A timeseries dataframe with user-friendly column headers that
             summarize the results pertaining to this instance
-
+        이 인스턴스와 관련된 결과를 요약하는 사용자 친화적인 열 머리글이 있는 시계열 데이터 프레임
         """
        # 부모 클래스인 MarketServiceUpAndDown의 timeseries_report 메서드 호출
         report = super(FrequencyRegulation, self).timeseries_report()\
@@ -190,14 +193,15 @@ class FrequencyRegulation(MarketServiceUpAndDown):
 
     def update_price_signals(self, monthly_data, time_series_data):
         """ Updates attributes related to price signals with new price signals
-            새로운 가격 신호로 관련된 속성을 업데이트
         that are saved in the arguments of the method. Only updates the
         price signals that exist, and does not require all price signals
         needed for this service.
-
+       새로운 가격 신호로 관련된 속성을 업데이트
+       해당 메서드의 인수에 저장된 가격 신호만 업데이트합니다.
+       이 서비스에 필요한 모든 가격 신호가 필요하지 않습니다.
         Args:
-            monthly_data (DataFrame): monthly data after pre-processing
-            time_series_data (DataFrame): time series data after pre-processing
+            monthly_data (DataFrame): monthly data after pre-processing / 전처리 후 월간 데이터
+            time_series_data (DataFrame): time series data after pre-processing / 전처리 후 시계열 데이터
 
         """
         if self.combined_market:
