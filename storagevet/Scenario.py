@@ -39,33 +39,34 @@ class Scenario(object):
 
     """
     TECH_CLASS_MAP = {
-        'CAES': CAES,
-        'Battery': Battery,
-        'PV': PV,
-        'ICE': ICE,
-        'Load': Load
-    }
+        'CAES': CAES, # 압축 공기 에너지 저장
+        'Battery': Battery, # 배터리
+        'PV': PV, # 태양 전지
+        'ICE': ICE, # 내연 기관
+        'Load': Load # 부하
+    } # 기술을 해당하는 클래스에 매핑하여 프로그램에서 쉽게 접근할 수 있도록 함
     VS_CLASS_MAP = {
-        'Deferral': Deferral,
-        'DR': DemandResponse,
-        'RA': ResourceAdequacy,
-        'Backup': Backup,
+        'Deferral': Deferral, # 지연 서비스
+        'DR': DemandResponse, # 수요 반응
+        'RA': ResourceAdequacy, # 자원 보증
+        'Backup': Backup, # 백업 서비스
         'Volt': VoltVar,  # THIS DOES NOT WORK
-        'User': UserConstraints,
-        'DA': DAEnergyTimeShift,
-        'FR': FrequencyRegulation,
-        'LF': LoadFollowing,
-        'SR': SpinningReserve,
-        'NSR': NonspinningReserve,
-        'DCM': DemandChargeReduction,
-        'retailTimeShift': EnergyTimeShift,
-    }
+        'User': UserConstraints, # 사용자 제약 조건
+        'DA': DAEnergyTimeShift, # 일간 에너지 시간 이동
+        'FR': FrequencyRegulation, # 주파수 조절
+        'LF': LoadFollowing, # 부하 추적
+        'SR': SpinningReserve, # 회전예비력
+        'NSR': NonspinningReserve, # 비회적 예비력
+        'DCM': DemandChargeReduction, # 수요 요금 감소 
+        'retailTimeShift': EnergyTimeShift, # 소매 시간 이동
+    } # 가상 서비스를 해당하는 클래스에 매핑하여 프로그램에서 쉽게 접근할 수 있도록 함
 
     def __init__(self, input_tree):
         """ 시나리오 객체를 초기화하는 함수
         사용자 입력 파라미터 및 초기화된 속성을 설정함함
         """
         self.verbose = input_tree.Scenario['verbose']
+        # verbose 속성은 input_tree의 Scenario 딕셔너리에서 'verbose' 키에 해당하는 값을 가져와 할당
         self.start_time = time.time()
         self.start_time_frmt = time.strftime('%Y%m%d%H%M%S')
         self.end_time = 0
@@ -116,8 +117,8 @@ class Scenario(object):
         # these are attributes that are changed as the scenario is solved
         self.solvers = []
         self.poi = None
-        self.service_agg = None
-        self.cost_benefit_analysis = None
+        self.service_agg = None 
+        self.cost_benefit_analysis = None #cost benefit analysis비용 편익 분석
         self.optimization_levels = pd.DataFrame()
         self.objective_values = pd.DataFrame()
         self.system_requirements = None
