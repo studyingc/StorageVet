@@ -108,6 +108,7 @@ class Scenario(object):
             'NSR': input_tree.NSR,
             'DCM': input_tree.DCM,
             'retailTimeShift': input_tree.retailTimeShift,
+            # input_tree 객체의 속성들을 특정 문자열과 연결하여 딕셔너리에 저장하는 역할
         }
         self.poi_inputs = input_tree.POI
         self.finance_inputs = input_tree.Finance
