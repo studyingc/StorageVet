@@ -116,12 +116,12 @@ class Scenario(object):
 
         # these are attributes that are changed as the scenario is solved
         self.solvers = []
-        self.poi = None
-        self.service_agg = None 
-        self.cost_benefit_analysis = None #cost benefit analysis비용 편익 분석
-        self.optimization_levels = pd.DataFrame()
-        self.objective_values = pd.DataFrame()
-        self.system_requirements = None
+        self.poi = None # 관심 지점
+        self.service_agg = None # 서비스 집계
+        self.cost_benefit_analysis = None #비용 편익 분석
+        self.optimization_levels = pd.DataFrame() # 최적화 수준
+        self.objective_values = pd.DataFrame() # 목적 함수 값
+        self.system_requirements = None # 시스템 요구 사항
         self.opt_engine = True  # indicates that dervet should go to the optimization module and size there
 
     def set_up_poi_and_service_aggregator(self, point_of_interconnection_class=POI, service_aggregator_class=ServiceAggregator):
