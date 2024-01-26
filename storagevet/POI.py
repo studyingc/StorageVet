@@ -106,12 +106,13 @@ class POI:
             if der_instance.technology_type == 'Energy Storage System':
                 total_soe += der_instance.get_state_of_energy(mask)
                 tot_net_ess += der_instance.get_net_power(mask)
-                # auxiliary load (hp) for a Battery will contribute to agg_power variables
+                # auxiliary load (hp) for a Battery will contribute to agg_power variables 
+                # auxiliary load: 보조 부하
                 #   in a similar manner to SiteLoad (add to flow_in and subtract from flow_out)
-                try:
+                try: # 배터리에 보조 부하가 잇는 경우
                     aux_load = der_instance.hp
-                    agg_power_flows_in += aux_load
-                    agg_power_flows_out -= aux_load
+                    agg_power_flows_in += aux_load # 해당 보조부하를 추가
+                    agg_power_flows_out -= aux_load # 해당 보조부하를 뺌
                 except AttributeError:
                     pass
             if der_instance.technology_type == 'Generator':
@@ -134,21 +135,35 @@ class POI:
         return load_sum, var_gen_sum, gen_sum, tot_net_ess, der_dispatch_net_power, total_soe, agg_power_flows_in, agg_power_flows_out, agg_steam_heating_power, agg_hotwater_heating_power, agg_thermal_cooling_power
 
     def combined_discharge_rating_for_reliability(self):
-        """ 신뢰성 제약을 위한 복합 방전 등급을 계산하는 함수수
+        """ 
+            시스템의 신뢰성 전력 제약을 생성
         """
         combined_rating = 0
         for der_instance in self.active_ders:
-            if der_instance.technology_type == 'Energy Storage System':
-                combined_rating += der_instance.dis_max_rated
+            if der_instance.technology_type == 'Energy Storage System': #
+                combined_rating += der_instance.dis_max_rated # ESS의 최대 방전 평가를 추가
             if der_instance.technology_type == 'Generator':
-                combined_rating += der_instance.rated_power
+                combined_rating += der_instance.rated_power # 발전기의 평가된 전력을 추가
         return combined_rating
+        # ESS과 ICE(발전기)의 결합 방전 등급을 얻을 수 있음
 
     def optimization_problem(self, mask, power_in, power_out, steam_in, hotwater_in, cold_in, annuity_scalar=1):
-        """ 최적화 문제를 생성하고 POI의 제약 조건 리스트를 반환하는 함수수
+        """ 
+        최적화 문제를 생성하고 POI의 제약 조건 리스트를 반환하는 함수
+
+        Power_in: 전력 입력
+        Power_out: 전력 출력
+        Steam_in: 스팀 입력
+        hotwater_in: 핫워터 입력
+        cold_in: 냉수 입력
+        annuity_scalr(float): 전체 프로젝트 수명 동안 비용/수익을 포착하는 데 도움이 되는 연간 비용 또는 이익에 곱해지는 스칼라 값
+
+        반환값
+        - 영향을 받는 목적 함수의 일부분을 나타내는 표현식의 키로 라벨이 지정된 딕셔너리 
+        - POI에 의해 설정된 제약 조건 목록: 전력 예약, 제어 제약 조건 요구 사항, 최대 수입, 최대 수출 등
         """
-        constraint_list = []
-        opt_size = sum(mask)
+        constraint_list = [] 
+        opt_size = sum(mask) # 최적화에 사용될 크기
         obj_expression = {}  # dict of objective costs
 
         # deal with grid_charge constraint btw ESS and PV
@@ -161,57 +176,75 @@ class POI:
         agg_inv_max = 0
         dc_coupled_pvs = False
 
+        # total_pv_out_ess_can_charge_from: 에너지 저장 시스템이 충전할 수 잇는 PV(태양광)의 총 출력
+        # total_ess_charge: 에너지 저장 시스템의 총 충전량
+        # allow_chage_from_grid: 그리드에서 충전을 허용하는지 여부를 결정하는 불리언 값
+        # total_pv_out_dc: 직류 결합된 PV와 ESS 사이의 인버터 제약 조건을 처리하기 위한 pv의 총출력 / PV의 DC 출력
+        # net_ess_power: ESS의 순 전력
+        # agg_inv_max: 집계된 인버터의 최대값
+        # dc_coupled_pvs: 직류 결합된 PV 시스템이 있는지 여부를 나타내는 불리언 값
+
         for der_instance in self.active_ders:
             # add all operational constraints
             constraint_list += der_instance.constraints(mask)
+            # 운용 제약 조건을 계산하고 제약 조건 리스트에 추가
             # add DER cost funcs
             obj_expression.update(der_instance.objective_function(mask, annuity_scalar))
-            if der_instance.tag == 'PV':
-                if not der_instance.grid_charge:
+            # 목적 함수를 계산하고 목적 함수 표현식 딕셔너리를 업데이트
+            if der_instance.tag == 'PV': # DER의 태그가 'PV'인 경우
+                if not der_instance.grid_charge: # 그리드 충전을 허용하지 않는 경우
                     allow_charge_from_grid = False
-                    total_pv_out_ess_can_charge_from += der_instance.get_discharge(mask)
-                if der_instance.loc == 'dc':
+                    total_pv_out_ess_can_charge_from += der_instance.get_discharge(mask) # DER의 방전 값을 추가
+                if der_instance.loc == 'dc': # 위치가 'dc'인 경우
                     dc_coupled_pvs = True
-                    total_pv_out_dc += der_instance.get_discharge(mask)
-                    agg_inv_max += der_instance.inv_max
-            if der_instance.technology_type == 'Energy Storage System':
-                net_ess_power += der_instance.get_net_power(mask)
-                total_ess_charge += der_instance.get_charge(mask)
+                    total_pv_out_dc += der_instance.get_discharge(mask) # DER의 방전 값을 추가
+                    agg_inv_max += der_instance.inv_max # DER의 인버터 최대값을 추가
+            if der_instance.technology_type == 'Energy Storage System': # 기술 유형이 'Energy Storage System'인 경우
+                net_ess_power += der_instance.get_net_power(mask) # DER의 순 전력을 추가
+                total_ess_charge += der_instance.get_charge(mask) # DER의 충전 값을 추가
 
-        if not allow_charge_from_grid:  # add grid charge constraint
+        if not allow_charge_from_grid:  # 그리드 충전을 허용하지 않는 경우, add grid charge constraint
             constraint_list += [cvx.NonPos(total_ess_charge - total_pv_out_ess_can_charge_from)]
+            # 에너지 저장 시스템(ESS)이 태양광(PV)으로부터만 충전되는 경우에 해당
 
-        if dc_coupled_pvs:  # add dc coupling constraints
+        if dc_coupled_pvs:  # 직류 결합된 PV 시스템이 있는 경우, add dc coupling constraints
             constraint_list += [cvx.NonPos(total_pv_out_dc + (-1) * net_ess_power - agg_inv_max)]
             constraint_list += [cvx.NonPos(-agg_inv_max - total_pv_out_dc + net_ess_power)]
+            # 직류 결합된 PV 시스템과 ESS 사이의 인버터 제약 조건이 최적화 문제에 추가되어 올바른 동작을 보장
 
         # power import/export constraints
         # NOTE: power_in is agg_p_in (defined in self.get_state_of_system)
         # NOTE: power_out is agg_p_out (defined in self.get_state_of_system)
-        if self.apply_poi_constraints:
-            # (agg_p_in) <= -max_import
+        if self.apply_poi_constraints: # POI 제약 조건을 적용하는 경우
+            # (agg_p_in) <= -max_import, 총 전력 수입이 최대 수입량 이하임을 보장
             constraint_list += [cvx.NonPos(self.max_import + power_in)]
 
-            # (agg_p_out) <= max_export
+            # (agg_p_out) <= max_export, 총 전력 수출이 최대 수출량 이하임을 보장
             # NOTE: with active_load_dump True, we do not include this constraint
-            #   active_load_dump only occurs in DER-VET
+            #   active_load_dump only occurs in DER-VET, DER-VET에서만 발생하며, 이 경우 최대 수출 제약 조건을 비활성화
             if not self.disable_max_export_poi_constraint():
                 constraint_list += [cvx.NonPos(power_out + -1 * self.max_export)]
+            # 최대 수입 및 최대 수출 제약 조건이 최적화 문제에 추가되어 올바른 동작을 보장
 
         return obj_expression, constraint_list
+        # 목적 함수 표현식과 제약 조건 리스트를 반환
 
     def disable_max_export_poi_constraint(self):
+        # NOTE: active_load_dump only occurs in DER-VET, DER-VET에서만 사용가능 ==> 그럼 굳이 사용할 필요가 없는 코드인가?
         # 최대 수출 POI 제약을 비활성화하는지 여부를 반환하는 함수수
         try:
-            disable_max_export = self.active_load_dump
-            if disable_max_export:
+            disable_max_export = self.active_load_dump # active_load_dump의 값을 변수에 할당
+            if disable_max_export: # active_load_dump가 True인 경우
                 TellUser.warning(f'You have activated a load dump in DER-VET, therefore we disable the max_export POI constraint in the optimization. The load dump will be determined as a post-optimization calculation.')
             return disable_max_export
-        except AttributeError:
-            return False
+        except AttributeError: # active_load_dump 속성이 정의되지 않은 경우
+            return False # 최대 수출 POI 제약 조건이 비활성화되지 않음
 
     def aggregate_p_schedules(self, mask):
-        """ DER의 방전 및 충전 일정을 합산하여 전력 조정 서비스에 참여할 수 있는 능력을 계산하는 함수수
+        """ 
+        DER(분산 에너지 자원)의 방전 전력 일정을 합산하는 기능을 수행
+        '전력 일정(Power Schedule)'은 기술의 방전 용량이 전력을 더 많이 공급하도록 입찰할 수 있는 양(UP) 또는 전력을 더 적게 공급하도록 입찰할 수 있는 양(DOWN)을 정의
+        POI가 연결된 전기 그리드에서 이루어지는 것
         """
         opt_size = sum(mask)
         agg_dis_up = cvx.Parameter(value=np.zeros(opt_size), shape=opt_size, name='POI-Zero')
@@ -222,17 +255,26 @@ class POI:
         uenergy_decr = cvx.Parameter(value=np.zeros(opt_size), shape=opt_size, name='POI-Zero')
         uenergy_thru = cvx.Parameter(value=np.zeros(sum(mask)), shape=sum(mask), name='ServiceAggZero')
 
-        for der_in_market_participation in self.active_ders:
-            if der_in_market_participation.can_participate_in_market_services:
-                agg_ch_up += der_in_market_participation.get_charge_up_schedule(mask)
-                agg_ch_down += der_in_market_participation.get_charge_down_schedule(mask)
-                agg_dis_up += der_in_market_participation.get_discharge_up_schedule(mask)
-                agg_dis_down += der_in_market_participation.get_discharge_down_schedule(mask)
-                uenergy_incr += der_in_market_participation.get_uenergy_increase(mask)
-                uenergy_decr += der_in_market_participation.get_uenergy_decrease(mask)
-                uenergy_thru += der_in_market_participation.get_delta_uenegy(mask)
+        # agg_dis_up: 전력을 더 많이 공급
+        # agg_dis_down: 역방향으로 전력을 끌어내림
+        # agg_ch_up: 그리드로부터 더 많은 전력을 받아들임
+        # agg_ch_down: 역방향으로 그리드로 전력을 밀어올림
+        # uenergy_incr: 서브 타임 스텝 활동 중에 저장된 에너지를 증가
+        # uenergy_decr: 서브 타임 스텝 활동 중에 저장된 에너지를 감소
+        # uenergy_thru: 서브 타임 스텝 활동 중 전달된 총 에너지
+        
+        for der_in_market_participation in self.active_ders: # active_ders 리스트에 있는 각 DER에 대해 반복
+            if der_in_market_participation.can_participate_in_market_services: # DER이 시장 서비스에 참여할 수 있는지 확인
+                agg_ch_up += der_in_market_participation.get_charge_up_schedule(mask) # DER의 충전 UP 일정 누적
+                agg_ch_down += der_in_market_participation.get_charge_down_schedule(mask) # DER의 충전 DOWN 일정 누적 
+                agg_dis_up += der_in_market_participation.get_discharge_up_schedule(mask) # DER의 방전 UP 일정 누적
+                agg_dis_down += der_in_market_participation.get_discharge_down_schedule(mask) # DER의 방전 DOWN 일정 누적
+                uenergy_incr += der_in_market_participation.get_uenergy_increase(mask) # DER의 에너지 증가 누적 
+                uenergy_decr += der_in_market_participation.get_uenergy_decrease(mask) # DER의 에너지 감소 누적
+                uenergy_thru += der_in_market_participation.get_delta_uenegy(mask) # DER의 에너지 변경 누적
 
         return agg_dis_down, agg_dis_up, agg_ch_down, agg_ch_up, uenergy_decr, uenergy_incr, uenergy_thru
+        # 누적된 값들 반환
 
     def merge_reports(self, is_dispatch_opt, index):
         """ DER들의 최적화 결과를 수집하고 병합하여 사용자 친화적인 결과를 나타내는 데이터프레임을 반환하는 함수수
