@@ -9,6 +9,7 @@ from storagevet.ErrorHandling import *
 
 class POI:
     # 에너지 시스템의 포인트 오브 인터커넥션을 나타내는 클래스
+    # 부하 데이터 저장, POI에서 적용해야할 제약 조건 부과
 
     def __init__(self, params, technology_inputs_map, technology_class_map):
         """ POI 객체를 초기화하하는 함수
