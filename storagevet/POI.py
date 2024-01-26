@@ -8,6 +8,7 @@ from storagevet.ErrorHandling import *
 
 
 class POI:
+    # POI: point of interconenection
     # 에너지 시스템의 포인트 오브 인터커넥션을 나타내는 클래스
     # 부하 데이터 저장, POI에서 적용해야할 제약 조건 부과
 
@@ -43,12 +44,12 @@ class POI:
         max_ch = 0
         max_dis = 0
 
-        for der_instance in self.active_ders:
+        for der_instance in self.active_ders: # 활성화된 DER 사례들을 순회
             min_ene += der_instance.operational_min_energy()
             max_ene += der_instance.operational_max_energy()
             max_ch += der_instance.charge_capacity()
             max_dis += der_instance.discharge_capacity()
-        return max_ch, max_dis, (max_ene, min_ene)
+        return max_ch, max_dis, (max_ene, min_ene) # 시스템의 크기를 계산하고 반환
 
     def initialize_optimization_variables(self, size):
         """ 최적화 루프의 시작에서 최적화 변수를 초기화하는 함수 
