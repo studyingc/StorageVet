@@ -59,7 +59,23 @@ class POI:
             der_instance.initialize_variables(size)
 
     def get_state_of_system(self, mask):
-        """ POI의 상태를 측정하여 최적화에 사용될 파라미터를 계산하는 함수수
+        """ 
+        POI의 상태를 측정하여 최적화에 사용될 파라미터를 계산하는 함수
+        SET_UP_OPTIMIZATION에서 호출됨
+
+        반환값
+        - load sum: 부하 집계
+        - var_gen_sum: 가변 자원으로부터의 발전
+        - gen_sum: 다른 출처에서의 발전
+        - tot_net_ess: ESS의 총 순 전력
+        - der_dispatch_net_power: 디스패처블 DERs(중단되지 않는 자원 및 부하가 아님)로부터의 순 전력
+        - total_soe: 시스템에 저장된 에너지의 총 상태
+        - agg_power_flows_in: POI로의 모든 전력 흐름 집계
+        - agg_power_flows_out: POI에서의 모든 전력 흐름 집계
+        
+        - agg_steam_heating_power: 스팀 열화력(열 회수된 열)의 집계
+        - agg_hotwater_heating_power: 핫워터 열화력(열 회수된 열)의 집계
+        - agg_thermal_cooling_power: 열 냉각력(냉각 회수된 열)의 집계
         """
         opt_var_size = sum(mask)
         load_sum = cvx.Parameter(value=np.zeros(opt_var_size), shape=opt_var_size, name='POI-Zero')  # at POI
@@ -74,15 +90,19 @@ class POI:
         agg_steam_heating_power = cvx.Parameter(value=np.zeros(opt_var_size), shape=opt_var_size, name='POI-Zero')  # at POI
         agg_hotwater_heating_power = cvx.Parameter(value=np.zeros(opt_var_size), shape=opt_var_size, name='POI-Zero')  # at POI
         agg_thermal_cooling_power = cvx.Parameter(value=np.zeros(opt_var_size), shape=opt_var_size, name='POI-Zero')  # at POI
-
+        # 최적화 위한 변수 설정
+        
         for der_instance in self.active_ders:
             # add the state of the der's power over time & stored energy over time to system's
+            # 시간에 따른 전력, 에너지 저장 상태를 시스템의 변수에 추가
             # these agg_power variables are used with POI constraints
             agg_power_flows_in += (der_instance.get_charge(mask) - der_instance.get_discharge(mask))
             agg_power_flows_out += (der_instance.get_discharge(mask) - der_instance.get_charge(mask))
+            # 전력 흐름 계산
 
-            if der_instance.technology_type == 'Load':
+            if der_instance.technology_type == 'Load': # 기술 유형 확인
                 load_sum += der_instance.get_charge(mask)
+                # 해당 DER의 충전 값을 load_sum 변수에 추가
             if der_instance.technology_type == 'Energy Storage System':
                 total_soe += der_instance.get_state_of_energy(mask)
                 tot_net_ess += der_instance.get_net_power(mask)
