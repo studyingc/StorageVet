@@ -224,7 +224,7 @@ class LoadFollowing(MarketServiceUpAndDown):
             time_series_data (DataFrame): time series data after pre-processing
 
         """
-        if self.combined_market:                                              # self.combined_market = 시장 결합 여부부
+        if self.combined_market:                                              # self.combined_market = 시장 결합 여부
             try:
                 fr_price = time_series_data.loc[:, 'LF Price ($/kW)']         """LF Price ($/kW) 열을 시계열 데이터로부터 가져와 fr_price변수에 할당"""
             except KeyError:
