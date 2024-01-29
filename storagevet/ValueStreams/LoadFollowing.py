@@ -164,15 +164,15 @@ class LoadFollowing(MarketServiceUpAndDown):
 
         Args:
             mask (DataFrame): A boolean array that is true for indices
-                corresponding to time_series data included in the subs data set
+                corresponding to time_series data included in the subs data set     (mask = 불리언 마스크 (시점 지정))
             tot_variable_gen (Expression): the sum of the variable/intermittent
-                generation sources
-            load_sum (list, Expression): the sum of load within the system
-            generator_out_sum (list, Expression): the sum of conventional
-                generation within the system
-            net_ess_power (list, Expression): the sum of the net power of all
+                generation sources                                                  (tot_variable_gen = 변동/비정기 발전량의 합)
+            load_sum (list, Expression): the sum of load within the system          (load_sum = 시스템 내 부하의 합)
+            generator_out_sum (list, Expression): the sum of conventional           (generator_out_sum = 시스템 내 기존 발전량의 합)
+                generation within the system                                 
+            net_ess_power (list, Expression): the sum of the net power of all       (net_ess_power = 시스템 내 모든 ESS의 순 발전량 합 (전력망으로의 방향은 음수))
                 the ESS in the system. flow out into the grid is negative
-            combined_rating (Dictionary): the combined rating of each DER class
+            combined_rating (Dictionary): the combined rating of each DER class     (combined_rating = 각 DER 클래스 유형의 합산 정격)
                 type
 
         Returns:
@@ -189,7 +189,7 @@ class LoadFollowing(MarketServiceUpAndDown):
             constraint_list += [
                 cvx.NonPos(self.variables['up_ch'] + self.variables['up_dis']
                            - self.regu_max.loc[mask])
-            ]                                                                       """상향 참여의 제약 조건으로, up_ch와 up_dis의 합이 regu_max를 초과하지 않아야 함"""
+            ]                                                                       """상향 참여의 제약 조건으로, up_ch(상향 참여량 (충전))와 up_dis(상향 참여량 (방전))의 합이 regu_max를 초과하지 않아야 함"""
             constraint_list += [
                 cvx.NonPos((-1) * self.variables['up_ch'] + (-1) * self.variables[
                     'up_dis'] + self.regu_min.loc[mask])
@@ -199,7 +199,7 @@ class LoadFollowing(MarketServiceUpAndDown):
             constraint_list += [
                 cvx.NonPos(self.variables['down_ch'] + self.variables['down_dis']
                            - self.regd_max.loc[mask])
-            ]                                                                       """하향 참여의 제약 조건으로, down_ch와 down_dis의 합이 regd_max를 초과하지 않아야 함"""
+            ]                                                                       """하향 참여의 제약 조건으로, down_ch(하향 참여량 (충전))와 down_dis(하향 참여량 (방전))의 합이 regd_max를 초과하지 않아야 함"""
             constraint_list += [
                 cvx.NonPos(-self.variables['down_ch'] - self.variables['down_dis']
                            + self.regd_min.loc[mask])
@@ -224,7 +224,7 @@ class LoadFollowing(MarketServiceUpAndDown):
             time_series_data (DataFrame): time series data after pre-processing
 
         """
-        if self.combined_market:                                      
+        if self.combined_market:                                              # self.combined_market = 시장 결합 여부부
             try:
                 fr_price = time_series_data.loc[:, 'LF Price ($/kW)']         """LF Price ($/kW) 열을 시계열 데이터로부터 가져와 fr_price변수에 할당"""
             except KeyError:
