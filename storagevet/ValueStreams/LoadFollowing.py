@@ -58,16 +58,16 @@ class LoadFollowing(MarketServiceUpAndDown):
             params (Dict): input parameters
         """
         MarketServiceUpAndDown.__init__(self, 'LF', 'Load Following', params)    # MarketServiceUpAndDown 클래스의 생성자를 호출하여 해당 클래스의 초기화를 먼저 수행/params라는 딕셔너리 형태의 입력 매개변수를 받음
-        self.u_ts_constraints = params.get('u_ts_constraints', False)            # u_ts_constraints 속성 설정, 없으면 False 반환
-        self.d_ts_constraints = params.get('d_ts_constraints', False)            # d_ts_constraints 속성 설정, 없으면 Fales 반
+        self.u_ts_constraints = params.get('u_ts_constraints', False)            # u_ts_constraints 속성 설정, 없으면 False 반환 (u_ts_constraints=상향 에너지 제어 제약 여부)
+        self.d_ts_constraints = params.get('d_ts_constraints', False)            # d_ts_constraints 속성 설정, 없으면 Fales 반환 (d_ts_constraints=하향 에너지 제어 제약 여부)
         if self.u_ts_constraints:
-            self.regu_max = params['lf_u_max']
-            self.regu_min = params['lf_u_min']
+            self.regu_max = params['lf_u_max']                                   # regu_max = 상향 에너지 제어 상한
+            self.regu_min = params['lf_u_min']                                   # regu_min = 상향 에너지 제어 하한
         # u_ts_constraints가 True인 경우에 실행되는 조건문
         # regu_max와 regu_min 속성 설정하고, params에서 해당 값을 가져옴
         if self.d_ts_constraints:
-            self.regd_max = params['lf_d_max']
-            self.regd_min = params['lf_d_min']
+            self.regd_max = params['lf_d_max']                                   # regd_max = 하향 에너지 제어 상한
+            self.regd_min = params['lf_d_min']                                   # regd_min = 하향 에너지 제어 하한
         # d_ts_constraints가 True인 경우에 실행되는 조건문
         # regd_max와 regd_min 속성 설정하고, params에서 해당 값을 가져옴
 
@@ -93,10 +93,10 @@ class LoadFollowing(MarketServiceUpAndDown):
         """
         # MarketServiceUpAndDown의 grow_drop_data 메서드를 호출하여 해당 메서드 먼저 실행
         super().grow_drop_data(years, frequency, load_growth)                     
-        self.eou_avg = Lib.fill_extra_data(self.eou_avg, years, 0, frequency)    # eou_avg 변수에 대해 Lib.fill_extra_data 함수를 사용하여 추가된 데이터를 0으로 채움
+        self.eou_avg = Lib.fill_extra_data(self.eou_avg, years, 0, frequency)    # eou_avg 변수에 대해 Lib.fill_extra_data 함수를 사용하여 추가된 데이터를 0으로 채움 (eou_avg = 시뮬레이션 종료 시점의 평균 에너지 사용량)
         self.eou_avg = Lib.drop_extra_data(self.eou_avg, years)                  # eou_avg 변수에 대해 Lib.drop_extra_data 함수를 사용하여 추가된 데이터 중 불필요한 데이터를 삭제
 
-        self.eod_avg = Lib.fill_extra_data(self.eod_avg, years, 0, frequency)    # eod_avg 변수에 대해 Lib.fill_extra_data 함수를 사용하여 추가된 데이터를 0으로 채움
+        self.eod_avg = Lib.fill_extra_data(self.eod_avg, years, 0, frequency)    # eod_avg 변수에 대해 Lib.fill_extra_data 함수를 사용하여 추가된 데이터를 0으로 채움 (eod_avg = 시뮬레이션 시작 지점의 평균 에너지 사용량)
         self.eod_avg = Lib.drop_extra_data(self.eod_avg, years)                  # eod_avg 변수에 대해 Lib.drop_extra_data 함수를 사용하여 추가된 데이터 중 불필요한 데이터를 삭제
 
         if self.u_ts_constraints:
