@@ -175,7 +175,7 @@ class Scenario(object):
         """ 최적화 수준을 할당하는 함수수
         """
         # create dataframe to fill
-        level_index = Lib.create_timeseries_index(analysis_years, frequency)
+        level_index = Lib.create_timeseries_index(analysis_years, frequency) # 내부 프로그램에서 시간 단위 시작을 나타냄
         level_df = pd.DataFrame({'control': np.zeros(len(level_index))}, index=level_index)
         current_control_level = 0
         # control level should not overlap multiple years & there is only one per timestep
