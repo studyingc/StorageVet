@@ -54,5 +54,5 @@ if __name__ == '__main__':
                         help='specify this flag for verbose output during execution')
     arguments = parser.parse_args()
 
-    case = StorageVET(arguments.parameters_filename, arguments.verbose)
+    case = StorageVET(arguments.parameters_filename, arguments.verbose) # storagevet 실행 코드
     case.solve()
