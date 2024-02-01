@@ -45,7 +45,7 @@ class StorageVET:
         """
         starts = time.time()
         for key, value in self.case_dict.items():
-            run = Scenario(value)
+            run = Scenario(value) # scenario.py 실행
             run.set_up_poi_and_service_aggregator()
             run.initialize_cba()
             run.fill_and_drop_extra_data()
