@@ -123,6 +123,7 @@ class Scenario(object):
         self.objective_values = pd.DataFrame() # 목적 함수 값
         self.system_requirements = None # 시스템 요구 사항
         self.opt_engine = True  # indicates that dervet should go to the optimization module and size there
+        # 의심해볼만한 점
 
     def set_up_poi_and_service_aggregator(self, point_of_interconnection_class=POI, service_aggregator_class=ServiceAggregator):
         """ POI(접속 지점)와 서비스 어그리게이터를 초기화하는 함수
