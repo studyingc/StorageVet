@@ -243,25 +243,30 @@ class Scenario(object):
         return level_df
 
     def optimize_problem_loop(self):
-        """ 최적화 루프를 시작하여 다양한 최적화 윈도우에 대한 최적화 문제를 해결하는 함수수
+        """ 최적화 루프를 시작하여 다양한 최적화 윈도우에 대한 최적화 문제를 해결하는 함수
         """
+        # 만약 최적화 엔진이 없다면 함수 종료
         if not self.opt_engine:
             return
-
+        # 로그 레벨을 info로 설정하여 "Starting optimization loop" 메시지를 출력
         TellUser.info("Starting optimization loop")
+        # optimization_level에서 중복되지 않는 예측 기간 값을 가져와 루프를 실행
         for opt_period in self.optimization_levels.predictive.unique():
+            #최적화를 위한 함수, 제약조건 및 서브 인덱스 설정
             # setup + run optimization then return optimal objective costs
             functions, constraints, sub_index = self.set_up_optimization(opt_period)
 
-            ##NOTE: these print statements reveal the final constraints and costs for debugging
+            ##NOTE: 주석 처리된 부분은 디버깅을 위한 print 문으로, 최종 제약조건과 비용을 출력
             #print(f'\nFinal constraints ({len(constraints)}):')
             #print(f'\nconstraints ({len(constraints)}):')
             #print('\n'.join([f'{i}: {c}' for i, c in enumerate(constraints)]))
             #print(f'\ncosts ({len(functions)}):')
             #print('\n'.join([f'{k}: {v}' for k, v in functions.items()]))
             #print()
-
+            
+            # 최적화 문제를 해결하고 최적화 문제, 목적 함수 표현식 및 CVXPY 라이브러리에서 발생한 오류 메시지를 반환
             cvx_problem, obj_expressions, cvx_error_msg = self.solve_optimization(functions, constraints)
+            # 최적화 결과를 저장하는 메서드를 호출하여 결과를 저장
             self.save_optimization_results(opt_period, sub_index, cvx_problem, obj_expressions, cvx_error_msg)
 
     def set_up_optimization(self, opt_window_num, annuity_scalar=1, ignore_der_costs=False):
