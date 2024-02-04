@@ -252,8 +252,8 @@ class Scenario(object):
         TellUser.info("Starting optimization loop")
         # optimization_level에서 중복되지 않는 예측 기간 값을 가져와 루프를 실행
         for opt_period in self.optimization_levels.predictive.unique():
-            #최적화를 위한 함수, 제약조건 및 서브 인덱스 설정
             # setup + run optimization then return optimal objective costs
+            # 최적화를 위한 함수, 제약조건 및 서브 인덱스 설정
             functions, constraints, sub_index = self.set_up_optimization(opt_period)
 
             ##NOTE: 주석 처리된 부분은 디버깅을 위한 print 문으로, 최종 제약조건과 비용을 출력
