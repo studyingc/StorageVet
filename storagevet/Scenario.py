@@ -146,24 +146,27 @@ class Scenario(object):
     def fill_and_drop_extra_data(self):
         """ 값 스트림 및 기술 요소에서 분석 연도에 필요한 데이터를 유지하고 추가 데이터를 필요에 따라 추가하는 함수수
         """
+
+        # update_analysis_years 메서드를 사용하여 분석 연도를 업데이트하고 필요한 데이터를 유지
         self.opt_years = self.service_agg.update_analysis_years(self.end_year, self.poi, self.frequency, self.opt_years, self.def_growth)
 
-        # add rte_list from all active ess to each value stream
+        # 모든 활성 ess의 rte_list를 각 value stream에 추가
         for service in self.service_agg.value_streams.values():
             service.rte_list(self.poi)
 
-        # add missing years of data to each value stream
+        # 각 값 스트림에 누락된 연도의 데이터를 추가
         for service in self.service_agg.value_streams.values():
             service.grow_drop_data(self.opt_years, self.frequency, self.def_growth)
 
-        # remove any data that we will not use for analysis
+        # 분석에 사용하지 않을 데이터를 제거
         for der in self.poi.der_list:
             der.grow_drop_data(self.opt_years, self.frequency, self.def_growth)
 
         # create optimization levels
         self.optimization_levels = self.assign_optimization_level(self.opt_years, self.n, 0, self.frequency, self.dt)
 
-        # initialize degredation module in ESS objects (NOTE: if no degredation module applies to specific ESS tech, then nothing happens)
+        # ESS 객체 내 degredation 모듈 초기화
+        # (NOTE: if no degredation module applies to specific ESS tech, then nothing happens)
         for der in self.poi.der_list:
             if der.technology_type == "Energy Storage System":
                 der.initialize_degradation_module(self.optimization_levels)
