@@ -165,8 +165,7 @@ class Scenario(object):
         # create optimization levels
         self.optimization_levels = self.assign_optimization_level(self.opt_years, self.n, 0, self.frequency, self.dt)
 
-        # ESS 객체 내 degredation 모듈 초기화
-        # (NOTE: if no degredation module applies to specific ESS tech, then nothing happens)
+        # ESS 객체 내 degredation 모듈 초기화한다. 만약 해당 ESS 기술에 대해 어떠한 degradation module도 정의되어 있지 않다면, 메서드가 호출되더라도 아무런 동작이나 변경이 발생하지 않을 것
         for der in self.poi.der_list:
             if der.technology_type == "Energy Storage System":
                 # optimization_levels를 사용하여 degradation 모듈을 초기화
