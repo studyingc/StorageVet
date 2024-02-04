@@ -257,11 +257,11 @@ class Scenario(object):
             functions, constraints, sub_index = self.set_up_optimization(opt_period)
 
             ##NOTE: 주석 처리된 부분은 디버깅을 위한 print 문으로, 최종 제약조건과 비용을 출력
-            #print(f'\nFinal constraints ({len(constraints)}):')
-            #print(f'\nconstraints ({len(constraints)}):')
-            #print('\n'.join([f'{i}: {c}' for i, c in enumerate(constraints)]))
-            #print(f'\ncosts ({len(functions)}):')
-            #print('\n'.join([f'{k}: {v}' for k, v in functions.items()]))
+            #print(f'\nFinal constraints ({len(constraints)}):')                   # 최종 제약 조건
+            #print(f'\nconstraints ({len(constraints)}):')                         # 제약조건
+            #print('\n'.join([f'{i}: {c}' for i, c in enumerate(constraints)]))    # 
+            #print(f'\ncosts ({len(functions)}):')                                 # 비용
+            #print('\n'.join([f'{k}: {v}' for k, v in functions.items()]))         # 
             #print()
             
             # 최적화 문제를 해결하고 최적화 문제, 목적 함수 표현식 및 CVXPY 라이브러리에서 발생한 오류 메시지를 반환
