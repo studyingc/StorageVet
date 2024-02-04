@@ -165,7 +165,7 @@ class Scenario(object):
         # create optimization levels
         self.optimization_levels = self.assign_optimization_level(self.opt_years, self.n, 0, self.frequency, self.dt)
 
-        # ESS 객체 내 degredation 모듈 초기화
+        # ESS 객체 내 degredation 모듈 초기화//
         # (NOTE: if no degredation module applies to specific ESS tech, then nothing happens)
         for der in self.poi.der_list:
             if der.technology_type == "Energy Storage System":
