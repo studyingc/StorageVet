@@ -89,13 +89,15 @@ class Result:
     def collect_results(self):
         """ 최적화 변수 솔루션이나 사용자 입력을 수집하여 드릴다운 플롯 및 사용자에게 보고할 데이터프레임을 생성하는 함수
         """
-
+        #로그 레벨을 debug로 설정하여 최적화 후 분석 수행 중임을 알
         TellUser.debug("Performing Post Optimization Analysis...")
-
+        # POI 객체를 사용하여 최적화 엔진 및 시계열 데이터 인덱스를 활용하여 보고서 데이터프레임 생성
         report_df, monthly_report = self.poi.merge_reports(self.opt_engine,
                                                            self.time_series_data.index)
+        # 최적화 후의 보고서 데이터프레임을 시계열 데이터에 추가
         self.time_series_data = pd.concat([self.time_series_data, report_df],
                                           axis=1)
+        # 최적화 후의 월간 보고서 데이터프레임을 월간 데이터에 추가
         self.monthly_data = pd.concat([self.monthly_data, monthly_report],
                                       axis=1, sort=False)
 
@@ -104,12 +106,14 @@ class Result:
         self.time_series_data = pd.concat([self.time_series_data, ts_df], axis=1)
 
         self.monthly_data = pd.concat([self.monthly_data, month_df], axis=1, sort=False)
-
+        
+        # POI 객체를 사용하여 기술 요약 정보 수집
         self.technology_summary = self.poi.technology_summary()
 
     def create_drill_down_dfs(self):
         """ ServiceAggregator 및 POI에 드릴다운 보고서 생성을 지시하는 함수
         """
+        # 만약 최적화 엔진이 존재한다면, POI 객체와 ServiceAggregator객체에게 드릴다운 데이터프레임 생성을 지시하고 결과를 업데이트합니다.
         if self.opt_engine:
             self.drill_down_dict.update(self.poi.drill_down_dfs(monthly_data=self.monthly_data, time_series_data=self.time_series_data,
                                                                 technology_summary=self.technology_summary))
