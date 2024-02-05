@@ -190,7 +190,7 @@ class ValueStream:
             표현식의 키로 레이블이 지정된 목적 함수의 영향 부분을 나타내는 딕셔너리. 기본값은 {}를 반환합니다.
         """
         return {}
-
+    # objective_function & constraints의 차이: annuity_scalar & combined_rating => combined_rating에 의해 제약 조건 생성
     def constraints(self, mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, combined_rating):
         """기본 제약 목록을 빌드하는 메서드. 제약이 없는 서비스에서 사용됩니다.
 
@@ -202,6 +202,8 @@ class ValueStream:
             net_ess_power (list, Expression): 시스템 내의 모든 ESS의 순 전력 합계 [= 충전 - 방전]
             combined_rating (cvx.Expression, int): 최악의 경우 상황에서 신뢰성 있게 디스패치될 수 있는 DER의 결합 등급
             일반적으로 ESS 및 발전기입니다.
+
+           
 
         Returns:
             나중에 제약 조건을 집계하기 위한 빈 리스트
