@@ -103,9 +103,11 @@ class ServiceAggregator:
         opt_functions = {}
         opt_constraints = []
         for value_stream in self.value_streams.values():
-            opt_functions.update(value_stream.objective_function(mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, annuity_scalar))
-            opt_constraints += value_stream.constraints(mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, combined_rating)
+            opt_functions.update(value_stream.objective_function(mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, annuity_scalar)) # objective_funciton => valuestreams
+            opt_constraints += value_stream.constraints(mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, combined_rating) # constraints => ValueStreams
+            # objective_function으로 valuestream의 목적함수, constraints로 제약 조건 추가
         return opt_functions, opt_constraints
+        # 최적화 함수, 최적화 제약 조건 반환
 
     def aggregate_reservations(self, mask):
         """ 전체 전력 예약을 계산하는 함수
