@@ -306,13 +306,15 @@ class Scenario(object):
         # ESS와 ICE(발전기)의 결합 방전 등급
         # 여러 개의 전력장치나 전력설비가 함께 연결되어 작동할 때 견딜 수 있는 총 전력/부하 = 전체 시스템이 안정적으로 운영될 수 있는 최대 전력
 
-        # set up controller first to collect and provide inputs to the POI
-        funcs, consts = self.service_agg.optimization_problem(mask, load_sum, var_gen_sum, gen_sum, tot_net_ess, combined_rating, annuity_scalar)
-
-        # add optimization problem portion from the POI
-        temp_objectives, temp_consts = self.poi.optimization_problem(mask, agg_p_in, agg_p_out, agg_steam, agg_hotwater, agg_cold, annuity_scalar)
+        # set up controller first to collect and provide inputs to the POI # POI에 입력을 수집하고 제공
+        funcs, consts = self.service_agg.optimization_problem(mask, load_sum, var_gen_sum, gen_sum, tot_net_ess, combined_rating, annuity_scalar) # optimization_problem => serviceAggregator
+        # 목적함수, 제약 조건
+        
+        # POI에서 최적화 문제 부분 추가
+        temp_objectives, temp_consts = self.poi.optimization_problem(mask, agg_p_in, agg_p_out, agg_steam, agg_hotwater, agg_cold, annuity_scalar) # optimization_problem => poi
         if not ignore_der_costs:
             #  don't ignore der costs
+            # DER 비용을 무시하지 않음
             funcs.update(temp_objectives)
         consts += temp_consts
 
