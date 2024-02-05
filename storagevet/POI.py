@@ -135,9 +135,8 @@ class POI:
         return load_sum, var_gen_sum, gen_sum, tot_net_ess, der_dispatch_net_power, total_soe, agg_power_flows_in, agg_power_flows_out, agg_steam_heating_power, agg_hotwater_heating_power, agg_thermal_cooling_power
 
     def combined_discharge_rating_for_reliability(self):
-        """ 
-            시스템의 신뢰성 전력 제약을 생성
-        """
+        # 신뢰성 전력 제약 조건을 생성
+        
         combined_rating = 0
         for der_instance in self.active_ders:
             if der_instance.technology_type == 'Energy Storage System': #
