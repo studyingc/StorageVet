@@ -138,7 +138,7 @@ class POI:
         # 신뢰성 전력 제약 조건을 생성
         
         combined_rating = 0
-        for der_instance in self.active_ders:
+        for der_instance in self.active_ders: # 활성화된 DER에 대해서 반복
             if der_instance.technology_type == 'Energy Storage System': #
                 combined_rating += der_instance.dis_max_rated # ESS의 최대 방전 평가를 추가
             if der_instance.technology_type == 'Generator':
