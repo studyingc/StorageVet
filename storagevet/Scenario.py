@@ -316,16 +316,18 @@ class Scenario(object):
             funcs.update(temp_objectives)
         consts += temp_consts
 
-        # add system requirement constraints (get the subset of data that applies to the current optimization window)
-        for req_name, requirement in self.system_requirements.items():
-
+        # 시스템 요구 사항 제약 조건 추가 (현재 최적화 창에 적용되는 데이터 하위 집합을 가져옴)
+        for req_name, requirement in self.system_requirements.items(): # self.system_requirements의 req_name, requirement에 대해서 반복
+    
             # NOTE: der_dispatch_net_power is (charge - discharge) for each DER that can dispatch power
-            #           (not Intermittent Resources, and not Load)
-            if req_name == 'der dispatch discharge min':
-                req_value = requirement.get_subset(mask)
-                #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')
-                req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='DerDispatchDisMinReq')
-                consts += [cvx.NonPos(req_parameter + der_dispatch_net_power)]
+            #           (not Intermittent Resources, and not Load) : 간헐 발전원 / 부하가 아님
+           
+            if req_name == 'der dispatch discharge min': # 요구 사항 이름 'der dispatch discharge min'인 경우
+                req_value = requirement.get_subset(mask) # 하위 집합을 가져옴
+                #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')  
+                req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='DerDispatchDisMinReq') 
+                consts += [cvx.NonPos(req_parameter + der_dispatch_net_power)] 
+                # der_dispatch_net_power의 합이 음수가 되는 제약
                 continue
 
             #if req_name == 'der dispatch charge max':
@@ -335,25 +337,28 @@ class Scenario(object):
             #    consts += [cvx.NonPos(der_dispatch_net_power + -1 * req_parameter)]
             #    continue
 
-            if req_name == 'poi export min':
-                req_value = requirement.get_subset(mask)
+            if req_name == 'poi export min': # poi export min인 경우
+                req_value = requirement.get_subset(mask) 
                 #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')
                 req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='PoiExportMinReq')
                 consts += [cvx.NonPos(req_parameter + -1 * agg_p_out)]
+                # 수출 값이 양수일 때 사용됨
                 continue
 
-            if req_name == 'poi export max':
+            if req_name == 'poi export max': # poi export max인 경우
                 req_value = requirement.get_subset(mask)
                 #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')
                 req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='PoiExportMaxReq')
                 consts += [cvx.NonPos(agg_p_out + -1 * req_parameter)]
+                # 수출 값이 음수일 때 사용
                 continue
 
-            if req_name == 'poi import min':
+            if req_name == 'poi import min': 
                 req_value = requirement.get_subset(mask)
                 #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')
                 req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='PoiImportMinReq')
                 consts += [cvx.NonPos(req_parameter + -1 * agg_p_in)]
+                # 수입 값이 양수일 때 사용
                 continue
 
             if req_name == 'poi import max':
@@ -361,6 +366,7 @@ class Scenario(object):
                 #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')
                 req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='PoiImportMaxReq')
                 consts += [cvx.NonPos(agg_p_in + -1 * req_parameter)]
+                # 수입 값이 음수일 때 사용
                 continue
 
             if req_name == 'energy min':
@@ -368,6 +374,7 @@ class Scenario(object):
                 #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')
                 req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='SysEneMinReq')
                 consts += [cvx.NonPos(req_parameter + -1 * total_soe)]
+                # 에너지 저장소의 순 에너지가 양수일 때 사용
                 continue
 
             if req_name == 'energy max':
@@ -375,6 +382,7 @@ class Scenario(object):
                 #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')
                 req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='SysEneMaxReq')
                 consts += [cvx.NonPos(total_soe + -1 * req_parameter)]
+                # 에너지 저장소의 순 에너지가 음수일 때 사용
                 continue
 
             # if this part of the method is reached, we have failed to recognize a system requirement and should fail
@@ -382,8 +390,8 @@ class Scenario(object):
             TellUser.error(error_message)
             raise SystemRequirementsError(error_message)
 
-        res_dis_d, res_dis_u, res_ch_d, res_ch_u, ue_prov, ue_stor, worst_ue_pro, worst_ue_sto = self.service_agg.aggregate_reservations(mask)
-        sch_dis_d, sch_dis_u, sch_ch_d, sch_ch_u, ue_decr, ue_incr, total_dusoe = self.poi.aggregate_p_schedules(mask)
+        res_dis_d, res_dis_u, res_ch_d, res_ch_u, ue_prov, ue_stor, worst_ue_pro, worst_ue_sto = self.service_agg.aggregate_reservations(mask) # aggregate_reservations => servic aggregator
+        sch_dis_d, sch_dis_u, sch_ch_d, sch_ch_u, ue_decr, ue_incr, total_dusoe = self.poi.aggregate_p_schedules(mask) # aggregate_p_schedules => POI
         # make sure P schedule matches the P reservations
         consts += [cvx.NonPos(res_dis_d + (-1) * sch_dis_d)]
         consts += [cvx.NonPos(res_dis_u + (-1) * sch_dis_u)]
