@@ -111,7 +111,19 @@ class ServiceAggregator:
 
     def aggregate_reservations(self, mask):
         """ 전체 전력 예약을 계산하는 함수
-        서비스별로 충전 및 방전 예약을 집계하는 함수수
+        서비스별로 충전 및 방전 예약을 집계하는 함수
+
+        value stream에 대해 예약해야 하는 충전량
+        value stream에 대해 예약해야 하는 방전량
+
+        charge_up : 그리드로 전력을 밀어넣기 위한 충전 예약
+            charge_down : 그리드에서 전력을 가져오기 위한 충전 예약
+            discharge_up : 그리드로 전력을 밀어넣기 위한 방전 예약
+            discharge_down : 그리드에서 전력을 가져오기 위한 방전 예약
+            uenergy_stored : 하위 시간 단계 활동으로 인한 에너지 예약 저장
+            uenergy_provided : 하위 시간 단계 활동으로 인한 에너지 예약 전달
+            worst_ue_stored : 하위 시간 단계 활동으로 인한 최악의 에너지 저장
+            worst_ue_provided : 하위 시간 단계 활동으로 인한 최악의 에너지 제공
         """
         charge_up = cvx.Parameter(value=np.zeros(sum(mask)), shape=sum(mask), name='ServiceAggZero')
         charge_down = cvx.Parameter(value=np.zeros(sum(mask)), shape=sum(mask), name='ServiceAggZero')
