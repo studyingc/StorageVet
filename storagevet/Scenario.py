@@ -279,21 +279,32 @@ class Scenario(object):
             self.save_optimization_results(opt_period, sub_index, cvx_problem, obj_expressions, cvx_error_msg)
 
     def set_up_optimization(self, opt_window_num, annuity_scalar=1, ignore_der_costs=False):
-        """ 최적화를 위한 변수를 설정하고 최적화를 실행하는 함수수
         """
+        연도의 일부를 대상으로 최적화를 설정하고 실행합니다
+        """
+
+        # mask: 조건에 부합하는 데이터를 골라낼때 사용 = 필터링
+        
         # used to select rows from time_series relevant to this optimization window
-        mask = self.optimization_levels.predictive == opt_window_num
+        mask = self.optimization_levels.predictive == opt_window_num 
+        # 최적화 창(opt_window_num과 같은 값을 가지는 predictive 열)에 관련된 행을 선택
         sub_index = self.optimization_levels.loc[mask].index
+        # 최적화 창에 해당하는 인덱스
         TellUser.info(f"{time.strftime('%H:%M:%S')} Running Optimization Problem starting at {sub_index[0]} hb")
+        # 최적화 문제 시작하는 시간과, 최적화 창의 첫 번째 인덱스 출력
         opt_var_size = int(np.sum(mask))
+        # mask의 true 값의 합을 계산하여 최적화 변수의 크기를 나타냄
 
-        # set up variables
-        self.poi.initialize_optimization_variables(opt_var_size)
-        self.service_agg.initialize_optimization_variables(opt_var_size)
+        # 변수 설정
+        self.poi.initialize_optimization_variables(opt_var_size) #init - variables => POI
+        self.service_agg.initialize_optimization_variables(opt_var_size) #init - variables => service_agg
 
-        # grab values from the POI that is required to know calculate objective functions and constraints
-        load_sum, var_gen_sum, gen_sum, tot_net_ess, der_dispatch_net_power, total_soe, agg_p_in, agg_p_out, agg_steam, agg_hotwater, agg_cold = self.poi.get_state_of_system(mask)
-        combined_rating = self.poi.combined_discharge_rating_for_reliability()
+        # POI에서 목적 함수 및 제약 조건 계산에 필요한 값 가져오기
+        load_sum, var_gen_sum, gen_sum, tot_net_ess, der_dispatch_net_power, total_soe, agg_p_in, agg_p_out, agg_steam, agg_hotwater, agg_cold = self.poi.get_state_of_system(mask) # get - system => POI
+        # 최적화 변수 가져오기
+        combined_rating = self.poi.combined_discharge_rating_for_reliability() # combined - reliability => POI
+        # ESS와 ICE(발전기)의 결합 방전 등급
+        # 여러 개의 전력장치나 전력설비가 함께 연결되어 작동할 때 견딜 수 있는 총 전력/부하 = 전체 시스템이 안정적으로 운영될 수 있는 최대 전력
 
         # set up controller first to collect and provide inputs to the POI
         funcs, consts = self.service_agg.optimization_problem(mask, load_sum, var_gen_sum, gen_sum, tot_net_ess, combined_rating, annuity_scalar)
