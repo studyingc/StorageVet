@@ -395,25 +395,27 @@ class Scenario(object):
         
         
         # make sure P schedule matches the P reservations
-        consts += [cvx.NonPos(res_dis_d + (-1) * sch_dis_d)]
-        consts += [cvx.NonPos(res_dis_u + (-1) * sch_dis_u)]
-        consts += [cvx.NonPos(res_ch_u + (-1) * sch_ch_u)]
-        consts += [cvx.NonPos(res_ch_d + (-1) * sch_ch_d)]
+        consts += [cvx.NonPos(res_dis_d + (-1) * sch_dis_d)] # 방전 스케줄이 예약된 용량을 초과하지 않도록 보장
+        consts += [cvx.NonPos(res_dis_u + (-1) * sch_dis_u)] # 역방전 스케줄이 예약된 용량을 초과하지 않도록 보장
+        consts += [cvx.NonPos(res_ch_u + (-1) * sch_ch_u)] # 역충전 스케줄이 예약된 용량을 초과하지 않도록 보장
+        consts += [cvx.NonPos(res_ch_d + (-1) * sch_ch_d)] # 충전 스케줄이 예약된 용량을 초과하지 않도록 보장
 
         # match uE delta to uE reservation: energy increase
-        consts += [cvx.Zero(ue_prov + (-1) * ue_decr)]
+        consts += [cvx.Zero(ue_prov + (-1) * ue_decr)] # 에너지 공급 증가(ue_prov)와 에너지 감소 예약(ue_decr)의 차이가 0이 되도록 제약을 추가
         # match uE delta to uE reservation: energy decrease
-        consts += [cvx.Zero(ue_stor + (-1) * ue_incr)]
+        consts += [cvx.Zero(ue_stor + (-1) * ue_incr)] # 에너지 저장 증가(ue_stor)와 에너지 증가 예약(ue_incr)의 차이가 0이 되도록 제약을 추가
         # make sure that the net change in energy is less than the total change in system SOE
-        consts += [cvx.NonPos(total_dusoe + (-1) * ue_prov + (-1) * ue_stor)]
+        consts += [cvx.NonPos(total_dusoe + (-1) * ue_prov + (-1) * ue_stor)] # 시스템의 순 에너지 변화(total_dusoe)가 에너지 공급 및 저장의 증가(ue_prov, ue_stor)와 음수가 되도록 제약을 추가
 
         # require that SOE +/- worst case stays within bounds of DER mix
-        _, _, soe_limits = self.poi.calculate_system_size()
-        consts += [cvx.NonPos(total_soe + worst_ue_sto - soe_limits[0])]
-        consts += [cvx.NonPos(soe_limits[1] + worst_ue_pro + (-1)*total_soe)]
+        _, _, soe_limits = self.poi.calculate_system_size() # Caluculate - size => POI
+        consts += [cvx.NonPos(total_soe + worst_ue_sto - soe_limits[0])] # 시스템의 총 SOE(total_soe)와 최악의 에너지 저장(worst_ue_sto)가 SOE 한계(soe_limits[0])를 초과하지 않도록 제약을 추가 
+        consts += [cvx.NonPos(soe_limits[1] + worst_ue_pro + (-1)*total_soe)] # SOE 한계 상한(soe_limits[1])과 최악의 에너지 공급(worst_ue_pro)이 총 SOE를 초과하지 않도록 제약을 추가
 
         return funcs, consts, sub_index
-
+        # 함수(funcs), 상수(consts), 및 부속 인덱스(sub_index)가 반환
+        # 최적화 문제에 대한 제약 조건을 설정하는 함수에서 이들을 반환하여 최적화 문제를 해결하는 데 필요한 모든 요소를 제공
+    
     def solve_optimization(self, obj_expression, obj_const, force_glpk_mi=False):
         """ 최적화 문제를 설정하고 해결하는 함수
         """
