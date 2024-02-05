@@ -142,7 +142,7 @@ class POI:
             if der_instance.technology_type == 'Energy Storage System': #
                 combined_rating += der_instance.dis_max_rated # ESS의 최대 방전 평가를 추가
             if der_instance.technology_type == 'Generator':
-                combined_rating += der_instance.rated_power # 발전기의 평가된 전력을 추가
+                combined_rating += der_instance.rated_power # 발전기의 평가된 전력을 추가, rated_power = params(rated_capacity)
         return combined_rating
         # ESS과 ICE(발전기)의 결합 방전 등급을 얻을 수 있음
 
