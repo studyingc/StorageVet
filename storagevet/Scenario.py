@@ -175,20 +175,24 @@ class Scenario(object):
         self.system_requirements = self.service_agg.identify_system_requirements(self.poi.der_list, self.opt_years, self.frequency)
 
     @staticmethod
-    def assign_optimization_level(analysis_years, control_horizon, predictive_horizon, frequency, dt):
+     def assign_optimization_level(analysis_years, control_horizon, predictive_horizon, frequency, dt):
         """ 최적화 수준을 할당하는 함수수
         """
         # create dataframe to fill
         level_index = Lib.create_timeseries_index(analysis_years, frequency) # 내부 프로그램에서 시간 단위 시작을 나타냄
+        # Lib.create_timeseries_index 함수 활용 -> analysis_years, frequency 기반 인덱 
         level_df = pd.DataFrame({'control': np.zeros(len(level_index))}, index=level_index)
-        current_control_level = 0
+        # level_index를 control이라는 열로 초기
+        current_control_level = 0 # 현재 제어 레벨을 0으로 초기화
         # control level should not overlap multiple years & there is only one per timestep
-        for yr in level_index.year.unique():
-            sub = copy.deepcopy(level_df[level_df.index.year == yr])
-            if control_horizon == 'year':
-                # continue counting from previous year opt_agg
+        for yr in level_index.year.unique(): # leverl_index의 고유한 연도 값에 대해서 반복 실
+            sub = copy.deepcopy(level_df[level_df.index.year == yr]) 
+            # copy.deepcopy 함수를 이용해 해당 연도에 해당하는 dataframe 복사
+            if control_horizon == 'year': # control_horizon 값이 year인 경우
+                
                 level_df.loc[level_df.index.year == yr, 'control'] = current_control_level + 1
-            elif control_horizon == 'month':
+                # 이전 연도의 최적화 문제(opt_agg)에서부터 계속해서 숫자를 셈
+            elif control_horizon == 'month': # control_horizon 값이 month인 경우
                 # continue counting from previous year opt_agg
                 level_df.loc[level_df.index.year == yr, 'control'] = current_control_level + sub.index.month
             else:
@@ -200,33 +204,38 @@ class Scenario(object):
                 # continue counting from previous year opt_agg
                 level_df.loc[level_df.index.year == yr, 'control'] = ind + current_control_level
             current_control_level = max(level_df.control)
+            # 이전에 설정된 최대 제어 수준을 기반으로 다음 연도의 최적화 문제에 대한 수준을 설정
 
         # predictive level can overlap multiple years & there can be 1+ per timestep
-        if not predictive_horizon:
+        if not predictive_horizon: # 만약 perdictive_horizon이 없다
             # set to be the control horizon
             level_df['predictive'] = level_df.loc[:, 'control']
+            # 예측 level을 설정하고 이를 control level과 동일하게 설정
         else:
             # TODO this has not been tested yet -- HN (sorry hmu and I will help)
             # create a list of lists
             max_index = len(level_df['control'])
             predictive_level = np.repeat([], max_index)
-            current_predictive_level_beginning = 0
-            current_predictive_level = 0
+            current_predictive_level_beginning = 0 # 시작을 나타내는 변수 초기화
+            current_predictive_level = 0 # 변수 초기화
 
-            for control_level in level_df.control.unique():
-                if predictive_horizon == 'year':
+            for control_level in level_df.control.unique(): # level_df에서 control_level에 대해 반
+                if predictive_horizon == 'year': # predictive_horizon이 year인 경우
                     # needs to be a year from the beginning of the current predictive level, determine
                     # length of the year based on first index in subset
                     start_year = level_index[current_predictive_level_beginning].year[0]
-                    f_date = date(start_year, 1, 1)
-                    l_date = date(start_year + 1, 1, 1)
-                    delta = l_date - f_date
-                    current_predictive_level_end = int(delta.days*dt)
+                    # current_predictive_level_beginning에서 시작해 해당 연도의 start_year을 결정
+                    f_date = date(start_year, 1, 1) # 시작 연도의 1월 1일을 나타냄
+                    l_date = date(start_year + 1, 1, 1) # 다염 연도의 1월 1일을 나타
+                    delta = l_date - f_date # 연도의 길이를 구함
+                    current_predictive_level_end = int(delta.days*dt) # 연도의 길이를 시간 간격에 맞게 조정해 current_perdictive_level_end를 결정정
 
-                elif predictive_horizon == 'month':
+                elif predictive_horizon == 'month': # predictive_horizon이 month인 경우
                     # needs to be a month from the beginning of the current predictive level, determine
                     # length of the month based on first index in subset
-                    start_index = level_index[current_predictive_level_beginning]
+                    start_index = level_index[current_predictive_level_beginning] # 해당 월의 인덱스 결정 
+                    current_predictive_level_end = calendar.monthrange(start_index.year, start_index.month) 
+                    # 해당 월의 첫 번째 날과 마지막 날을 사용해 예측 수준의 길이를 계싼
                     current_predictive_level_end = calendar.monthrange(start_index.year, start_index.month)
                 else:
                     current_predictive_level_end = predictive_horizon * dt
