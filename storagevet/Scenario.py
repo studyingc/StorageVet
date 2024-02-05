@@ -444,6 +444,7 @@ class Scenario(object):
 
     def save_optimization_results(self, opt_window_num, sub_index, prob, obj_expression, cvx_error_msg):
         """ 최적화 결과를 저장하고 문제의 해결 상태를 확인하는 함
+        opt_window_num (최적화 창 번호), sub_index (하위 인덱스), prob (최적화 문제), obj_expression (목적 함수 표현식), cvx_error_msg  (CVX 오류 메시지)
         """
         TellUser.info(f'Optimization problem was {prob.status}')
         # save solver used
