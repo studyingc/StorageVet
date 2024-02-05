@@ -169,7 +169,7 @@ class Scenario(object):
         for der in self.poi.der_list:
             if der.technology_type == "Energy Storage System":
                 # optimization_levels를 사용하여 degradation 모듈을 초기화
-                der.initialize_degradation_module(self.optimization_levels)
+                der.initialize_degradation_module(self.optimization_levels) # => Distributied Energy Resource  
 
         # 시스템 요구 사항 계산 및 Value stream 에 의해 설정된 값이 충족되는지 확인
         self.system_requirements = self.service_agg.identify_system_requirements(self.poi.der_list, self.opt_years, self.frequency)
