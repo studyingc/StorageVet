@@ -156,9 +156,9 @@ class Scenario(object):
         for service in self.service_agg.value_streams.values(): # class ServiceAggregator 
             service.rte_list(self.poi) # class Valuestream
 
-        # 각 값 스트림에 누락된 연도의 데이터를 추가
+        # 각 Value Stream에 누락된 연도의 데이터를 추가
         for service in self.service_agg.value_streams.values():
-            service.grow_drop_data(self.opt_years, self.frequency, self.def_growth)
+            service.grow_drop_data(self.opt_years, self.frequency, self.def_growth) # class Valuestream
 
         # 분석에 사용하지 않을 데이터를 제거
         for der in self.poi.der_list:
