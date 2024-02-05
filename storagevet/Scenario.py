@@ -391,7 +391,9 @@ class Scenario(object):
             raise SystemRequirementsError(error_message)
 
         res_dis_d, res_dis_u, res_ch_d, res_ch_u, ue_prov, ue_stor, worst_ue_pro, worst_ue_sto = self.service_agg.aggregate_reservations(mask) # aggregate_reservations => servic aggregator
-        sch_dis_d, sch_dis_u, sch_ch_d, sch_ch_u, ue_decr, ue_incr, total_dusoe = self.poi.aggregate_p_schedules(mask) # aggregate_p_schedules => POI
+        sch_dis_d, sch_dis_u, sch_ch_d, sch_ch_u, ue_decr, ue_incr, total_dusoe = self.poi.aggregate_p_schedules(madsk) # aggregate_p_schedules => POI
+        
+        
         # make sure P schedule matches the P reservations
         consts += [cvx.NonPos(res_dis_d + (-1) * sch_dis_d)]
         consts += [cvx.NonPos(res_dis_u + (-1) * sch_dis_u)]
