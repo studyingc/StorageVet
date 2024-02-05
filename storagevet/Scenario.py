@@ -423,40 +423,43 @@ class Scenario(object):
     def solve_optimization(self, obj_expression, obj_const, force_glpk_mi=False):
         """ 최적화 문제를 설정하고 해결하는 함수
         """
-        # summary of objective expressions to set up optimization problem
-        obj = cvx.Minimize(sum(obj_expression.values()))
-        prob = cvx.Problem(obj, obj_const)
-        TellUser.info("Finished setting up the problem. Solving now.")
-        cvx_error_msg = ''
+        # objective expression의 요약을 통해 최적화 문제를 설정
+        obj = cvx.Minimize(sum(obj_expression.values())) # 목적 함수를 최소화하는 것으로 설정
+        prob = cvx.Problem(obj, obj_const) # 최적화 문제 정의
+        TellUser.info("Finished setting up the problem. Solving now.") # 문제 설정이 완료되었음을 사용자에게 알림
+        cvx_error_msg = '' # cvxpy에서 발생한 오류 메시지를 저장하기 위한 변수를 초기화
         try:
-            if prob.is_mixed_integer():
-                # MBL: GLPK will solver to a default tolerance but can take a long time. Can use ECOS_BB which uses a branch and bound method
-                # and input a tolerance but I have found that this is a more sub-optimal solution. Would like to test with Gurobi
-                # information on solvers and parameters here: https://www.cvxpy.org/tgitstatutorial/advanced/index.html
-
-                # prob.solve(verbose=self.verbose_opt, solver=cvx.ECOS_BB, mi_abs_eps=1, mi_rel_eps=1e-2, mi_max_iters=1000)
+            if prob.is_mixed_integer(): # 혼합 정수 최적화 문제
+                # GLPK_MI를 사용, 문제 해결
                 start = time.time()
                 TellUser.debug("glpk_mi solver")
                 prob.solve(verbose=self.verbose_opt, solver=cvx.GLPK_MI)
                 end = time.time()
-                TellUser.info("Time it takes for solver to finish: " + str(end - start))
-            else:
+                TellUser.info("Time it takes for solver to finish: " + str(end - start)) # 솔버가 완료하는데 걸린 시간 출력
+            else: # 혼합 정수 최적화 문제가 아닌 경우
                 start = time.time()
-                # ECOS is default solver and seems to work fine here, however...
-                # a problem with ECOS was found when running projects with thermal loads,
-                # so we force use of glpk_mi for these cases
-                if force_glpk_mi:
+                if force_glpk_mi: # force_glpk_mi가 True로 설정된 경우
                     TellUser.debug("glpk_mi solver (for cases with thermal loads)")
-                    prob.solve(verbose=self.verbose_opt, solver=cvx.GLPK_MI)
-                else:
+                    prob.solve(verbose=self.verbose_opt, solver=cvx.GLPK_MI) # GLPK_MI를 사용, 문제 해결
+                else: # force_glpk_mi가 False로 설정된 경우
                     TellUser.debug("ecos_bb solver")
-                    prob.solve(verbose=self.verbose_opt, solver=cvx.ECOS_BB)
+                    prob.solve(verbose=self.verbose_opt, solver=cvx.ECOS_BB) #ECOS_BB 사용, 문제 해결
                 end = time.time()
-                TellUser.info("Time it takes for solver to finish: " + str(end - start))
-        except (cvx.error.SolverError, RuntimeError) as e:
-            TellUser.error("The solver was unable to find a solution.")
-            cvx_error_msg = e
-        return prob, obj_expression, cvx_error_msg
+                TellUser.info("Time it takes for solver to finish: " + str(end - start)) # 솔버가 완료하는데 걸린 시간 출력
+        except (cvx.error.SolverError, RuntimeError) as e: # 솔버 오류 발생
+            TellUser.error("The solver was unable to find a solution.") # 사용자에게 오류 메시지 알림
+            cvx_error_msg = e # 발생한 오류 메시지 저장
+        return prob, obj_expression, cvx_error_msg # 최적화 문제, 목적 함수 표현식, 발생한 오류 메시지 반환
+        """ 입력:
+            obj_expression: 최적화의 목적 함수 표현 딕셔너리
+            obj_const: 최적화 문제 제약 조건 나타내는 변수
+            force_glpk_mi (선택적): 부울 값, True로 설정 시 GLPK_MI를 사용하여 문제 해결, 기본값은 False
+            
+            출력:
+            prob: 최적화 문제 나타내는 cvxpy의 Problem 객체
+            obj_expression: 입력으로 받은 목적 함수 표현식 그대로 반환
+            cvx_error_msg: cvxpy에서 발생한 오류 메시지를 저장
+        """
 
     def save_optimization_results(self, opt_window_num, sub_index, prob, obj_expression, cvx_error_msg):
         """ 최적화 결과를 저장하고 문제의 해결 상태를 확인하는 함
