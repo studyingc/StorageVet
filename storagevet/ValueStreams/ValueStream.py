@@ -189,7 +189,7 @@ class ValueStream:
         Returns:
             표현식의 키로 레이블이 지정된 목적 함수의 영향 부분을 나타내는 딕셔너리. 기본값은 {}를 반환합니다.
         """
-        return {}
+        return {} # 딕셔너리 반환
 
     def constraints(self, mask, load_sum, tot_variable_gen, generator_out_sum, net_ess_power, combined_rating):
         """기본 제약 목록을 빌드하는 메서드. 제약이 없는 서비스에서 사용됩니다.
