@@ -147,12 +147,14 @@ class Scenario(object):
         """ 값 스트림 및 기술 요소에서 분석 연도에 필요한 데이터를 유지하고 추가 데이터를 필요에 따라 추가하는 함수수
         """
 
-        # update_analysis_years 메서드를 사용하여 분석 연도를 업데이트하고 필요한 데이터를 유지
-        self.opt_years = self.service_agg.update_analysis_years(self.end_year, self.poi, self.frequency, self.opt_years, self.def_growth)
-
+        # self는 객체의 인스턴스 그 자체를 말한다. 즉, 객체 자기 자신을 참조하는 매개변수
+        
+        # update_analysis_years 메서드를 사용하여 분석 연도를 업데이트하고 필요한 데이터를 유지(연도 간의 변화 및 시스템의 노출 검사)
+        self.opt_years = self.service_agg.update_analysis_years(self.end_year, self.poi, self.frequency, self.opt_years, self.def_growth) # class ServiceAggregator 
+        
         # 모든 활성 ess의 rte_list를 각 value stream에 추가
-        for service in self.service_agg.value_streams.values():
-            service.rte_list(self.poi)
+        for service in self.service_agg.value_streams.values(): # class ServiceAggregator 
+            service.rte_list(self.poi) # class Valuestream
 
         # 각 값 스트림에 누락된 연도의 데이터를 추가
         for service in self.service_agg.value_streams.values():
@@ -160,10 +162,10 @@ class Scenario(object):
 
         # 분석에 사용하지 않을 데이터를 제거
         for der in self.poi.der_list:
-            der.grow_drop_data(self.opt_years, self.frequency, self.def_growth)
+            der.grow_drop_data(self.opt_years, self.frequency, self.def_growth) # DER.py 
 
         # create optimization levels
-        self.optimization_levels = self.assign_optimization_level(self.opt_years, self.n, 0, self.frequency, self.dt)
+        self.optimization_levels = self.assign_optimization_level(self.opt_years, self.n, 0, self.frequency, self.dt) # class valuestream
 
         # ESS 객체 내 degredation 모듈 초기화한다. 만약 해당 ESS 기술에 대해 어떠한 degradation module도 정의되어 있지 않다면, 메서드가 호출되더라도 아무런 동작이나 변경이 발생하지 않을 것
         for der in self.poi.der_list:
@@ -172,8 +174,10 @@ class Scenario(object):
                 der.initialize_degradation_module(self.optimization_levels) # init - module => Batterytech  
 
         # 시스템 요구 사항 계산 및 Value stream 에 의해 설정된 값이 충족되는지 확인
-        self.system_requirements = self.service_agg.identify_system_requirements(self.poi.der_list, self.opt_years, self.frequency)
+        self.system_requirements = self.service_agg.identify_system_requirements(self.poi.der_list, self.opt_years, self.frequency) # class ServiceAggregator 
 
+""" 클래스 내부 속성들을 업데이트하고 상태를 변경하는 목적으로 사용되어 반환하는 값이 없는 경우가 많음.
+"""
     @staticmethod
      def assign_optimization_level(analysis_years, control_horizon, predictive_horizon, frequency, dt):
         """ 최적화 수준을 할당하는 함수수
