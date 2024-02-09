@@ -331,6 +331,11 @@ class Scenario(object):
                 #print(f'{req_name} (range):\n{req_value.min()} -- {req_value.max()}')  
                 req_parameter = cvx.Parameter(shape=opt_var_size, value=req_value, name='DerDispatchDisMinReq') 
                 consts += [cvx.NonPos(req_parameter + der_dispatch_net_power)] 
+                ```
+                    cvx.NonPos: Convex optimization 제약 조건 정의
+                    req_parameter: 상수, der_dispatch_net_power: 변수
+                    req_parameter + der_dispatch_net_power => 음수 또는 0이 되도록 하는 제약 조건
+                ```
                 # der_dispatch_net_power의 합이 음수가 되는 제약
                 continue
 
